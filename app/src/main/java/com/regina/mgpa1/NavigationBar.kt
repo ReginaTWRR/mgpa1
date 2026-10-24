@@ -42,6 +42,7 @@ enum class NavDestination(
 @Composable
 fun NavContentLoader(navController: NavHostController,_navdestination: NavDestination,modifier : Modifier = Modifier){
     NavHost(navController, startDestination = _navdestination.route) {
+        //Store All Navigation related items here
         NavDestination.entries.forEach{destination ->
             //Create the appropriate composables for each screen
             composable(destination.route){
