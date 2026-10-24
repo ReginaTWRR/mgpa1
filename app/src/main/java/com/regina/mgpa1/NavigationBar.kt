@@ -1,10 +1,13 @@
 package com.regina.mgpa1
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -12,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -33,13 +37,13 @@ enum class NavDestination(
     TEST4("TEST4","TEST4",android.R.drawable.star_off,"i"),
 }
 
-
 //==FUNCTIONS
 //This function aims to render the appropriate Navigation Content at the appropriate time.
 @Composable
 fun NavContentLoader(navController: NavHostController,_navdestination: NavDestination,modifier : Modifier = Modifier){
     NavHost(navController, startDestination = _navdestination.route) {
         NavDestination.entries.forEach{destination ->
+            //Create the appropriate composables for each screen
             composable(destination.route){
                 when(destination){
                     NavDestination.TEST1 -> println("poo1");
@@ -59,24 +63,34 @@ fun NavBarTest(){
     val navController = rememberNavController()
     val startDest = NavDestination.TEST1
     var selectedIndex by rememberSaveable { mutableIntStateOf(startDest.ordinal) }
-
-    return BottomAppBar() {
-        NavigationBar(
-            windowInsets = NavigationBarDefaults.windowInsets
-        ) {
-            NavDestination.entries.forEachIndexed { index, destination ->
-                //Create new nav Buttons
-                NavigationBarItem(
-                    selected = index == selectedIndex,
-                    onClick = {
-                        navController.navigate(route = destination.route)
-                        selectedIndex = index
-                    },
-                    icon = {
-                    },
-                    label = { Text(text = destination.label) }
-                )
+    //Use this as the main UI Holder
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            BottomAppBar{
+                //NavBar - tie the Inset logic
+                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets){
+                    NavDestination.entries.forEachIndexed { index, destination ->
+                        //Create new nav Buttons
+                        NavigationBarItem(
+                            selected = index == selectedIndex,
+                            onClick = {
+                                navController.navigate(route = destination.route)
+                                selectedIndex = index
+                            },
+                            icon = {
+                                //my SVG files REFUSE to cooperate so this will be empty for now
+                            },
+                            label = { Text(text = destination.label) }
+                        )
+                    }
+                }
             }
-        }
+        } //Lambda
+    ){ innerPadding ->
+        //Main Content. Note: The content (the list UI and allat shouldnt exist here at ALL. They
+        //should be in their own classes which gets handled by the loader
+        NavContentLoader(navController,startDest, Modifier.padding(innerPadding))
     }
+
 }
