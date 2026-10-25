@@ -4,23 +4,22 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.material3.Text
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 
 //==CLASSES
 
@@ -59,11 +58,16 @@ fun NavContentLoader(
 
 //Renders the Navbar and the buttons within it
 //This is a test func before I actually build the proper UI
+//Regina: Edited this function to implement swipe navigation.
 @Composable
 fun NavigationBar(){
-    val navController = rememberNavController()
-    val startDest = NavDestination.HOME
-    var selectedIndex by rememberSaveable { mutableIntStateOf(startDest.ordinal) }
+    val destinations = NavDestination.entries
+    val pagerState = rememberPagerState(
+        initialPage = NavDestination.HOME.ordinal,
+        pageCount = { destinations.size }
+    )
+    val scope = rememberCoroutineScope()
+
     //Use this as the main UI Holder
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -74,16 +78,17 @@ fun NavigationBar(){
                     NavDestination.entries.forEachIndexed { index, destination ->
                         //Create new nav Buttons
                         NavigationBarItem(
-                            selected = index == selectedIndex,
+                            selected = pagerState.currentPage == index,
                             onClick = {
-                                navController.navigate(route = destination.route)
-                                selectedIndex = index
+                                scope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
                             },
                             icon = {
                                 //my SVG files REFUSE to cooperate so this will be empty for now
                                 Image(
                                     painter = painterResource(id = destination.icon),
-                                    contentDescription = null
+                                    contentDescription = destination.contentDescription
                                 )
                             },
                             label = { Text(text = destination.label) }
@@ -92,10 +97,16 @@ fun NavigationBar(){
                 }
             }
         } //Lambda
-    ){ innerPadding ->
+    ) { innerPadding ->
         //Main Content. Note: The content (the list UI and allat shouldnt exist here at ALL. They
         //should be in their own classes which gets handled by the loader
-        NavContentLoader(navController,startDest, Modifier.padding(innerPadding))
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) { page ->
+            destinations[page].section.SectionLayout()
+        }
     }
-
 }
