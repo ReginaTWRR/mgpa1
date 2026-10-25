@@ -3,6 +3,7 @@ package com.regina.mgpa1
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -15,8 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.navigation.NavController
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,10 +31,10 @@ enum class NavDestination(
     @param:DrawableRes val icon : Int,
     val contentDescription: String
 ){
-    TEST1("TEST1","TEST1",R.drawable.ic_launcher_background,"i"),
-    TEST2("TEST2","TEST2",R.drawable.ic_launcher_foreground,"i"),
-    TEST3("TEST3","TEST3",android.R.drawable.star_on,"i"),
-    TEST4("TEST4","TEST4",android.R.drawable.star_off,"i"),
+    TEST1("TEST1","TEST1", R.drawable.home_page_icon,"i"),
+    TEST2("TEST2","TEST2", R.drawable.demon_page_icon,"i"),
+    TEST3("TEST3","TEST3", R.drawable.games_page_icon,"i"),
+    TEST4("TEST4","TEST4", R.drawable.login_page_icon,"i"),
 }
 
 //==FUNCTIONS
@@ -81,6 +81,10 @@ fun NavBarTest(){
                             },
                             icon = {
                                 //my SVG files REFUSE to cooperate so this will be empty for now
+                                Image(
+                                    painter = painterResource(id = destination.icon),
+                                    contentDescription = null
+                                )
                             },
                             label = { Text(text = destination.label) }
                         )

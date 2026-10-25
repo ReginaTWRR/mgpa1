@@ -35,15 +35,9 @@ fun Content(){
     NavBarTest()
 }
 
-@Composable
-fun Greeting( name:String, modifier: Modifier){
-
-}
-
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun AppPreview() {
     Mgpa1Theme {
         Content()
     }
