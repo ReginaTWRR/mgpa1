@@ -29,29 +29,29 @@ enum class NavDestination(
     val route: String,
     val label: String,
     @param:DrawableRes val icon : Int,
-    val contentDescription: String
+    val contentDescription: String,
+    val section: AppSection
 ){
-    TEST1("TEST1","TEST1", R.drawable.home_page_icon,"i"),
-    TEST2("TEST2","TEST2", R.drawable.demon_page_icon,"i"),
-    TEST3("TEST3","TEST3", R.drawable.games_page_icon,"i"),
-    TEST4("TEST4","TEST4", R.drawable.login_page_icon,"i"),
+    HOME("HOME", "Home", R.drawable.home_page_icon, "Home", HomeAppSection()),
+    DEMON("DEMON", "Demon List", R.drawable.demon_page_icon, "Demon List", DemonAppSection()),
+    GAMES("GAMES", "Games", R.drawable.games_page_icon, "Games", GamesAppSection()),
+    LOGIN("LOGIN", "Login", R.drawable.login_page_icon, "Login", LoginAppSection())
 }
 
 //==FUNCTIONS
 //This function aims to render the appropriate Navigation Content at the appropriate time.
 @Composable
-fun NavContentLoader(navController: NavHostController,_navdestination: NavDestination,modifier : Modifier = Modifier){
-    NavHost(navController, startDestination = _navdestination.route) {
+fun NavContentLoader(
+    navController: NavHostController,
+    navDestination: NavDestination,
+    modifier : Modifier = Modifier
+) {
+    NavHost(navController, startDestination = navDestination.route) {
         //Store All Navigation related items here
         NavDestination.entries.forEach{destination ->
             //Create the appropriate composables for each screen
             composable(destination.route){
-                when(destination){
-                    NavDestination.TEST1 -> println("poo1");
-                    NavDestination.TEST2 -> println("poo2");
-                    NavDestination.TEST3 -> println("poo3");
-                    NavDestination.TEST4 -> println("poo4");
-                }
+                destination.section.SectionLayout()
             }
         }
     }
@@ -60,9 +60,9 @@ fun NavContentLoader(navController: NavHostController,_navdestination: NavDestin
 //Renders the Navbar and the buttons within it
 //This is a test func before I actually build the proper UI
 @Composable
-fun NavBarTest(){
+fun NavigationBar(){
     val navController = rememberNavController()
-    val startDest = NavDestination.TEST1
+    val startDest = NavDestination.HOME
     var selectedIndex by rememberSaveable { mutableIntStateOf(startDest.ordinal) }
     //Use this as the main UI Holder
     Scaffold(

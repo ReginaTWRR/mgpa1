@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
 //So, Im keeping this function to reuse in the preview func and the main func
 @Composable
 fun Content(){
-    NavBarTest()
+    NavigationBar()
 }
 
 @Preview(showBackground = true)
