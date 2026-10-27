@@ -1,11 +1,19 @@
 package com.regina.mgpa1
 
 import android.R
+import android.app.Application
+import android.os.Build
 import androidx.compose.material3.rememberRangeSliderState
 import androidx.compose.ui.graphics.drawscope.Stroke
 import java.util.UUID
 import kotlinx.coroutines.*
+//import kotlinx.datetime.DateTimeUnit
+import java.net.HttpURLConnection
 import java.time.Instant
+import java.net.URL
+
+//==Default Variables
+val aredlLink = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //==ENUMS
 //the enums that some data classes use
@@ -15,8 +23,6 @@ enum class STATUS{
     LEGACY,
     REMOVED
 }
-
-
 
 //==DATA CLASSES
 //Refer to the ARDEL/other APIS API for more details on these classes. Ill leave a comment as to where these came from
@@ -51,6 +57,7 @@ data class User(
 )
 
 //Aredl Get Level Details
+//Note: Using Instant for the time, may be a bit strange tbh SO, if it breaks later on, use the kotlinx datetime
 data class Verification(
     val id:UUID,
     val submitted_by: User,
@@ -88,10 +95,23 @@ data class LevelDetails(
 )
 
 //==GETTER FUNCS
-
+suspend fun TestGet(){
+    val url = URL("$aredlLink/api/aredl/levels")
+    println("Start")
+    with(url.openConnection() as HttpURLConnection){
+        requestMethod = "GET"
+        println("Hi")
+        inputStream.bufferedReader().use {
+            it.lines().forEach { line ->
+                println(line)
+            }
+        }
+    }
+//    println("hide123" + URL("https://google.com").readText())
+    println("End")
+}
 
 //==HELPER FUNCS
-
 //This function gets the thumbnail image off of youtube videos. please pass in the link properly.
 //this needs the yt vid id which usually comes after the v= in yt link
 fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
@@ -107,7 +127,6 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
         return "https://img.youtube.com/vi/%3CVIDEO_ID%3E/hqdefault.jpg"
     }
     //To do: for safety: make this valid the yt link.
-
     return if(useMaxRes){
         "$prefix${splitLink[1]}$suffixMaxRes"
     }
@@ -115,3 +134,4 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
         "$prefix${splitLink[1]}$suffixHq"
     }
 }
+

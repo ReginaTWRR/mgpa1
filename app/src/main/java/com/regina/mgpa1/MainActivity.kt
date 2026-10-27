@@ -1,11 +1,12 @@
 package com.regina.mgpa1
 
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.regina.mgpa1.ui.theme.Mgpa1Theme
 
@@ -13,6 +14,10 @@ import com.regina.mgpa1.ui.theme.Mgpa1Theme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Not entirely sure why but this needs to be thing
+        val policy = ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
         enableEdgeToEdge()
         //The main
         setContent {
