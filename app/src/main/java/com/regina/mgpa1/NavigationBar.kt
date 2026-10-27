@@ -68,6 +68,7 @@ fun NavigationBar(){
     )
     val scope = rememberCoroutineScope()
 
+
     //Use this as the main UI Holder
     Scaffold(
         modifier = Modifier.fillMaxSize(),
