@@ -23,8 +23,11 @@ class HomeAppSection : AppSection("Home") {
                 onClick = {
                     //Gonna use this to pull data
                     scope.launch {
-                        TestGet()
+//                        TestGet()
+//                        GetfromAPI("/api/aredl/levels")
+                        GetLevelList()
                     }
+
                     println("hi")
                 }
             ) {

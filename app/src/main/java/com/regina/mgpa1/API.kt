@@ -1,117 +1,88 @@
 package com.regina.mgpa1
 
-import android.R
-import android.app.Application
-import android.os.Build
-import androidx.compose.material3.rememberRangeSliderState
-import androidx.compose.ui.graphics.drawscope.Stroke
+import android.util.JsonReader
+import androidx.annotation.RestrictTo
 import java.util.UUID
 import kotlinx.coroutines.*
-//import kotlinx.datetime.DateTimeUnit
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.time.Instant
 import java.net.URL
+import kotlinx.serialization.*
+import kotlinx.serialization.json.Json
+import java.time.LocalDateTime
+import kotlin.uuid.Uuid
+
 
 //==Default Variables
-val aredlLink = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
-//==ENUMS
-//the enums that some data classes use
-enum class STATUS{
-    PENDING,
-    MAINLIST,
-    LEGACY,
-    REMOVED
-}
-
-//==DATA CLASSES
-//Refer to the ARDEL/other APIS API for more details on these classes. Ill leave a comment as to where these came from
-
-//These are innefficient. find out if I can extract only one or specific details from the api.
-
-//List all Levels
-data class Level(
-    val id : UUID,
-    val name : String,
-    val position: Int,
-    val points: Int,
-    val status : STATUS,
-    val requires_raw_footage: Boolean,
-    val level_id:Int,
-    val two_player: Boolean,
-    val tags : List<String>,
-    val description: String,
-    val song: Int,
-    val edel_enjoyment : Number,
-    val is_edel_pending : Boolean,
-    val gddl_tier: Number,
-    val nlw_tier: String,
-    val completed_by_user: Boolean
+//This is a data class meant for this file.
+data class APIResponse(
+    var responseCode:Int = -1, //the response code that the api returns
+    var content: String = "Unsuccessful" //the content that the api returns
 )
 
-//Aredl Get Level Details
-data class User(
-    val id:UUID,
-    val username:String,
-    val global_name:String
-)
+//==API FUNCS
+//These funcs are for interacting with the API
 
-//Aredl Get Level Details
-//Note: Using Instant for the time, may be a bit strange tbh SO, if it breaks later on, use the kotlinx datetime
-data class Verification(
-    val id:UUID,
-    val submitted_by: User,
-    val mobile : Boolean,
-    val video_url: String,
-    val hide_video: Boolean,
-    val acheived_at: Instant,
-    val created_at: Instant,
-    val updated_at: Instant
-
-)
-
-//https://img.youtube.com/vi/gB8slBPlOjc/maxresdefault.jpg
-//https://img.youtube.com/vi/<VIDEO_ID>/hqdefault.jpg
-
-//Aredl Get Level Details
-data class LevelDetails(
-    val id : UUID,
-    val name : String,
-    val position: Int,
-    val points: Int,
-    val status : STATUS,
-    val requires_raw_footage: Boolean,
-    val level_id:Int,
-    val two_player: Boolean,
-    val tags : List<String>,
-    val description: String,
-    val song: Int,
-    val edel_enjoyment : Number,
-    val is_edel_pending : Boolean,
-    val gddl_tier: Number,
-    val nlw_tier: String,
-    val publisher: User,
-    val verifications:List<Verification>
-)
-
-//==GETTER FUNCS
-suspend fun TestGet(){
-    val url = URL("$aredlLink/api/aredl/levels")
-    println("Start")
-    with(url.openConnection() as HttpURLConnection){
-        requestMethod = "GET"
-        println("Hi")
-        inputStream.bufferedReader().use {
-            it.lines().forEach { line ->
-                println(line)
+//Ensure that the input is a proper aredl url func. Refer to the api docs or ask me(Eldrick) for more details
+//btw, this only hosts a temporary connection to grab data once.
+suspend fun getfromAPI(inputString : String): APIResponse{
+    //Define URL
+    val url = URL("$aredlEndPoint$inputString")
+    var response : APIResponse = APIResponse()
+    with(withContext(Dispatchers.IO) {url.openConnection()} as HttpURLConnection){
+        try{
+            requestMethod = "GET"
+            response.responseCode = responseCode
+            if(responseCode !in 200..300){
+                response.content = responseMessage
+            }
+            else{
+                //set response content to be the thing
+               inputStream.bufferedReader().use{
+                    val _response = StringBuffer()
+                    var inputLine = it.readLine()
+                    while(inputLine != null){
+                        _response.append(inputLine)
+                        inputLine = it.readLine()
+                    }
+                   response.content = _response.toString()
+                }
             }
         }
+        catch (e: IOException){
+            println("Reading Error:${e.message}. Cause: ${e.cause}")
+        }
+        finally {
+            disconnect()
+        }
     }
-//    println("hide123" + URL("https://google.com").readText())
-    println("End")
+    return response
 }
 
-//==HELPER FUNCS
+
+//==JSON Parsers
+
+suspend fun GetLevelList():List<Level>{
+    val scope = CoroutineScope(Dispatchers.Default)
+    val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels")}
+    val results = Json.decodeFromString<List<Level>>(response.content)
+
+    return results
+}
+
+suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
+//    val scope = CoroutineScope(Dispatchers.IO)
+    val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels/$LevelID")}
+    val results = Json.decodeFromString<LevelDetails>(response.content)
+    return results
+}
+
+//==OTHER FUNCS
+//These funcs are random, un categorised functions.
+
 //This function gets the thumbnail image off of youtube videos. please pass in the link properly.
 //this needs the yt vid id which usually comes after the v= in yt link
 fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
