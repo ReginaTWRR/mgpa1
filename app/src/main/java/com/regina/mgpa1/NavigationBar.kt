@@ -75,7 +75,7 @@ fun NavigationBar(){
             BottomAppBar{
                 //NavBar - tie the Inset logic
                 NavigationBar(windowInsets = NavigationBarDefaults.windowInsets){
-                    NavDestination.entries.forEachIndexed { index, destination ->
+                    destinations.forEachIndexed { index, destination ->
                         //Create new nav Buttons
                         NavigationBarItem(
                             selected = pagerState.currentPage == index,
