@@ -60,4 +60,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }

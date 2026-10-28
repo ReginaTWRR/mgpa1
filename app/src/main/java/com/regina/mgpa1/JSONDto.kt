@@ -35,7 +35,7 @@ data class Level(
     val status : STATUS,
 
     val requires_raw_footage: Boolean,
-    val level_id:Long,
+    val level_id: Int,
     val two_player: Boolean,
     val tags : List<String?>,
     val description: String ?= null,
