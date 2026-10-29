@@ -91,5 +91,5 @@ data class LevelDetails(
     val gddl_tier: Float? = null,
     val nlw_tier: String,
     val publisher: User,
-    val verifications:List<Verification>
+    val verifications: List<Verification>
 )

@@ -118,7 +118,6 @@ fun LevelCard(level: Level) {
     }
 
     Column() {
-        // Does not work yet, to review.
         val videoURL = levelDetails.value?.verifications[0]?.video_url
         if (videoURL != null) {
             AsyncImage(
