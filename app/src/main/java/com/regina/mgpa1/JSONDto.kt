@@ -35,7 +35,7 @@ data class Level(
     val status : STATUS,
 
     val requires_raw_footage: Boolean,
-    val level_id: Int,
+    val level_id:Int,
     val two_player: Boolean,
     val tags : List<String?>,
     val description: String ?= null,
@@ -77,19 +77,19 @@ data class Verification(
 data class LevelDetails(
     val id : String,
     val name : String,
-    val position: Int,
+    val position: Int ? = null,
     val points: Int,
     val status : STATUS,
     val requires_raw_footage: Boolean,
     val level_id:Int,
     val two_player: Boolean,
-    val tags : List<String>,
-    val description: String,
-    val song: Int,
-    val edel_enjoyment : Float,
+    val tags : List<String?>,
+    val description: String ? = null,
+    val song: Int ?= null,
+    val edel_enjoyment : Float ? = null,
     val is_edel_pending : Boolean,
     val gddl_tier: Float? = null,
-    val nlw_tier: String,
+    val nlw_tier: String? = null,
     val publisher: User,
-    val verifications: List<Verification>
+    val verifications:List<Verification>
 )
