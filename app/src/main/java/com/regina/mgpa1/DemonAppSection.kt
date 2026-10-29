@@ -115,14 +115,14 @@ fun LevelCard(level: Level) {
         } catch (e: Exception) {
             null
         }
-    }
+    }.value
 
     Column() {
-        val videoURL = levelDetails.value?.verifications[0]?.video_url
+        val videoURL = levelDetails?.verifications[0]?.video_url
         if (videoURL != null) {
             AsyncImage(
                 model = BuildYTWebImage(videoURL),
-                contentDescription = $"Youtube thumbnail video of ${level.name}"
+                contentDescription = "Youtube thumbnail video of ${level.name}"
             )
         }
         else {
@@ -135,17 +135,17 @@ fun LevelCard(level: Level) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = $"#${level.position} - ${level.name}",
+                text = "#${level.position} - ${level.name}",
                 color = Color.White
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column() {
                 Text(
-                    text = $"Published by: ${levelDetails.value?.publisher?.username}",
+                    text = "Published by: ${levelDetails?.publisher?.global_name}",
                     color = Color.White
                 )
                 Text(
-                    text = "Verified by: ",
+                    text = "Verified by: ${levelDetails?.verifications[0]?.submitted_by?.global_name}",
                     color = Color.White
                 )
             }
