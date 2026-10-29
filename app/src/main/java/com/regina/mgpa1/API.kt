@@ -89,7 +89,7 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
     val prefix = "https://img.youtube.com/vi/"
     val suffixHq = "/hqdefault.jpg"
     val suffixMaxRes = "/maxresdefault.jpg"
-    val splitLink = YTLink.split("?v=")
+    val splitLink = YTLink.split("=")
     if(splitLink.size !in 2..2){
         //You should be using links like https://www.youtube.com/watch?v=JqZrKtzZk7U where theres only one v=
         //Check if the split link is a bad size. if it is, then we return this.
@@ -104,5 +104,12 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
     else{
         "$prefix${splitLink[1]}$suffixHq"
     }
+}
+
+//So, this function is to grab a thumbnail from an established repo that the AREDL team made to house their thumbnails.
+//They used an api (I think) but they rely on this repo to store and grab their images. I found that this was used in the higher/lower game
+//so im following suite
+fun GetLevelThumbnail(LevelID : Int) : String{
+    return "https://raw.githubusercontent.com/All-Rated-Extreme-Demon-List/Thumbnails/main/levels/full/$LevelID.webp"
 }
 
