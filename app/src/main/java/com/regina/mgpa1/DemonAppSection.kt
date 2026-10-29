@@ -36,8 +36,10 @@ class DemonAppSection : AppSection("Demon List") {
                 //Store the info in memory(possible sideffects). You can try to explore your own solutions so yea
                 //Good luck
                 var fullList = StringBuffer()
-                for((_, name) in LevelsList.value){
-                    fullList.append(name + "\n")
+                for(level in LevelsList.value){
+                    val hi = runBlocking {GetLevelDetails(LevelID = level.level_id) }
+//                    fullList.append(name + "\n")
+                    fullList.append(hi.publisher.global_name)
                 }
                 Text(text = fullList.toString())
             }
