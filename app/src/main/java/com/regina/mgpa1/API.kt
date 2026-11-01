@@ -1,18 +1,10 @@
 package com.regina.mgpa1
 
-import android.util.JsonReader
-import androidx.annotation.RestrictTo
-import java.util.UUID
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.time.Instant
 import java.net.URL
-import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
-import java.time.LocalDateTime
-import kotlin.uuid.Uuid
-
 
 //==Default Variables
 val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
@@ -31,7 +23,7 @@ data class APIResponse(
 suspend fun getfromAPI(inputString : String): APIResponse{
     //Define URL
     val url = URL("$aredlEndPoint$inputString")
-    var response : APIResponse = APIResponse()
+    val response : APIResponse = APIResponse()
     with(withContext(Dispatchers.IO) {url.openConnection()} as HttpURLConnection){
         try{
             requestMethod = "GET"
@@ -66,7 +58,7 @@ suspend fun getfromAPI(inputString : String): APIResponse{
 //==JSON Parsers
 
 suspend fun GetLevelList():List<Level>{
-    val scope = CoroutineScope(Dispatchers.Default)
+//    val scope = CoroutineScope(Dispatchers.Default)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels")}
     val results = Json.decodeFromString<List<Level>>(response.content)
 
@@ -82,6 +74,11 @@ suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
 
 //==OTHER FUNCS
 //These funcs are random, un categorised functions.
+
+//This function gets a random level from the level list. Used in the Higher Lower game.
+suspend fun GetRandomLevel(): Level {
+    return GetLevelList().random()
+}
 
 //This function gets the thumbnail image off of youtube videos. please pass in the link properly.
 //this needs the yt vid id which usually comes after the v= in yt link

@@ -34,7 +34,7 @@ class DemonAppSection : AppSection(header = "Demon List") {
             initialValue = emptyList<Level>()
         ) {
             value = GetLevelList()
-        }
+        }.value
 
         // Biggest rendering body
         Column(
@@ -59,9 +59,9 @@ class DemonAppSection : AppSection(header = "Demon List") {
             Spacer(modifier = Modifier.height(10.dp))
 
             // Render the list
-            if (levelsList.value.isNotEmpty())
+            if (levelsList.isNotEmpty())
             {
-                LevelList(levelsList.value)
+                LevelList(levelsList)
             }
             else
             {
@@ -71,7 +71,7 @@ class DemonAppSection : AppSection(header = "Demon List") {
                 ) {
                     Text(
                         text = "Loading levels...",
-                        color = MaterialTheme.colorScheme.onBackground
+                        style = MaterialTheme.typography.titleLarge
                     )
                 }
             }

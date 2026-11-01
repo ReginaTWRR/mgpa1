@@ -16,10 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.regina.mgpa1.games.Higher_LowerGame
+//import androidx.navigation.NavHostController
+//import androidx.navigation.compose.NavHost
+//import androidx.navigation.compose.composable
+import com.regina.mgpa1.games.HigherLowerGame
 import kotlinx.coroutines.launch
 
 //==CLASSES
@@ -32,7 +32,7 @@ enum class NavDestination(
     val contentDescription: String,
     val section: AppSection
 ){
-    HOME("HOME", "Home", R.drawable.home_page_icon, "Home", Higher_LowerGame()),
+    HOME("HOME", "Home", R.drawable.home_page_icon, "Home", HigherLowerGame()),
     DEMON("DEMON", "Demon List", R.drawable.demon_page_icon, "Demon List", DemonAppSection()),
     GAMES("GAMES", "Games", R.drawable.games_page_icon, "Games", GamesAppSection()),
     LOGIN("LOGIN", "Login", R.drawable.login_page_icon, "Login", LoginAppSection())
@@ -40,22 +40,22 @@ enum class NavDestination(
 
 //==FUNCTIONS
 //This function aims to render the appropriate Navigation Content at the appropriate time.
-@Composable
-fun NavContentLoader(
-    navController: NavHostController,
-    navDestination: NavDestination,
-    modifier : Modifier = Modifier
-) {
-    NavHost(navController, startDestination = navDestination.route) {
-        //Store All Navigation related items here
-        NavDestination.entries.forEach{destination ->
-            //Create the appropriate composables for each screen
-            composable(destination.route){
-                destination.section.SectionLayout()
-            }
-        }
-    }
-}
+//@Composable
+//fun NavContentLoader(
+//    navController: NavHostController,
+//    navDestination: NavDestination,
+//    modifier : Modifier = Modifier
+//) {
+//    NavHost(navController, startDestination = navDestination.route) {
+//        //Store All Navigation related items here
+//        NavDestination.entries.forEach{destination ->
+//            //Create the appropriate composables for each screen
+//            composable(destination.route){
+//                destination.section.SectionLayout()
+//            }
+//        }
+//    }
+//}
 
 //Renders the Navbar and the buttons within it
 //This is a test func before I actually build the proper UI

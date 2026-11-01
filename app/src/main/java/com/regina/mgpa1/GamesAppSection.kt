@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.regina.mgpa1.games.Higher_LowerGame
+import com.regina.mgpa1.games.HigherLowerGame
 
 //==CLASSES
 
@@ -138,7 +138,7 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
 //A Composable function that renders the higher lower game
 @Composable
 fun GameHigherLower() {
-    Higher_LowerGame().SectionLayout()
+    HigherLowerGame().SectionLayout()
 }
 
 //A Composable function that defines a game card's appearance and function
