@@ -114,18 +114,20 @@ fun LevelCard(level: Level) {
         initialValue = null,
     ) {
         value = try {
-            GetLevelDetails(level.level_id)
+            GetLevelDetails(LevelID = level.level_id)
         } catch (e: Exception) {
             null
         }
     }.value
 
     Column() {
+        // Apparently, one level can be verified multiple times. For the purpose of
+        // this UI, we will just use the first one.
         val videoURL = levelDetails?.verifications[0]?.video_url
 
         if (videoURL != null) {
             AsyncImage(
-                model = BuildYTWebImage(videoURL),
+                model = BuildYTWebImage(YTLink = videoURL),
                 contentDescription = "Youtube thumbnail video of ${level.name}"
             )
         }

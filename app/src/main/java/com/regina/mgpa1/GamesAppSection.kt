@@ -27,50 +27,64 @@ import com.regina.mgpa1.games.Higher_LowerGame
 
 //==CLASSES
 
-//A class that implements the Games section of the App
+//A class that implements the Games section of the App. Designed with the
+//consideration of adding more games in the future, though there is currently only one.
 class GamesAppSection : AppSection(header = "Games") {
     @Preview
     @Composable
     override fun SectionLayout() {
+        // Need to declare currentPage before defining the overviewPage because of
+        // onGameClick() dependency. Just initialise with null first.
+        var currentPage by remember {
+            mutableStateOf<GamesPage?>(value = null)
+        }
+
+        // Define all games
         val games by remember {
             mutableStateOf(value = listOf<Game>(
-                Game(name = "HIGHER OR LOWER")
+                // Higher or lower
+                Game(
+                    name = "HIGHER OR LOWER",
+                    page = GamesPage(
+                        content = {
+                            GameHigherLower()
+                        }
+                    )
+                )
+            ))
+        }
+        // Define the overview page
+        val overviewPage by remember {
+            mutableStateOf(value = GamesPage(
+                content = {
+                    GameOverview(
+                        header, games,
+                        onGameClick = { game ->
+                            currentPage = game.page
+                        }
+                    )
+                }
             ))
         }
 
-        var gameView by remember {
-            mutableStateOf(value = GameView.NONE)
-        }
-
-        when (gameView) {
-            GameView.NONE -> {
-                GameOverview(
-                    header, games,
-                    onGameClick = { game ->
-                        when (game.name) {
-                            "HIGHER OR LOWER" -> gameView = GameView.HIGHERLOWER
-                            else -> gameView = GameView.NONE
-                        }
-                    }
-                )
-            }
-            GameView.HIGHERLOWER -> {
-                GameHigherLower()
-            }
-        }
+        // If currentPage is null, "initialise" it to overviewPage.
+        (currentPage ?: overviewPage).content()
     }
 }
 
-//A data class that defines a game
-data class Game(
-    val name: String
+//A data class that defines a games page
+data class GamesPage(
+    val content: @Composable () -> Unit
 ) {
 
 }
 
-//An enum class to define the different games that the user can view
-enum class GameView() {
-    NONE, HIGHERLOWER
+//A data class that defines a game
+data class Game(
+    val name: String,
+    val page: GamesPage
+) {
+
 }
 
 //==FUNCTIONS
