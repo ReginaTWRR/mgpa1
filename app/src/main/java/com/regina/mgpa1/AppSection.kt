@@ -13,7 +13,7 @@ interface SectionImplementation {
 
 //==CLASSES
 
-//An open class that serves as the base for each section class to inherit from
+//An abstract class that serves as the base for each section class to inherit from
 abstract class AppSection(
     val header: String
 ) : SectionImplementation {

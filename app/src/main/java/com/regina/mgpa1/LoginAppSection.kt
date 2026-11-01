@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 //==CLASSES
 
 //A class that implements the Login section of the App
-class LoginAppSection : AppSection("Login") {
+class LoginAppSection : AppSection(header = "Login") {
     @Composable
     override fun SectionLayout() {
         Column() {

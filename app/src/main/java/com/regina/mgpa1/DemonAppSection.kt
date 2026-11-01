@@ -25,7 +25,7 @@ import coil.compose.AsyncImage
 //==CLASSES
 
 //A class that implements the Demon section of the App
-class DemonAppSection : AppSection("Demon List") {
+class DemonAppSection : AppSection(header = "Demon List") {
     @Preview
     @Composable
     override fun SectionLayout() {
@@ -55,6 +55,7 @@ class DemonAppSection : AppSection("Demon List") {
                     style = MaterialTheme.typography.titleLarge
                 )
             }
+
             Spacer(modifier = Modifier.height(10.dp))
 
             // Render the list
@@ -121,6 +122,7 @@ fun LevelCard(level: Level) {
 
     Column() {
         val videoURL = levelDetails?.verifications[0]?.video_url
+
         if (videoURL != null) {
             AsyncImage(
                 model = BuildYTWebImage(videoURL),
@@ -133,6 +135,7 @@ fun LevelCard(level: Level) {
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
+
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -140,7 +143,9 @@ fun LevelCard(level: Level) {
                 text = "#${level.position} - ${level.name}",
                 color = MaterialTheme.colorScheme.onBackground
             )
+
             Spacer(modifier = Modifier.width(10.dp))
+
             Column() {
                 Text(
                     text = "Published by: ${levelDetails?.publisher?.global_name}",

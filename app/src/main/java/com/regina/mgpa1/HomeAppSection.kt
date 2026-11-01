@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 //==CLASSES
 
 //A class that implements the Home section of the App
-class HomeAppSection : AppSection("Home") {
+class HomeAppSection : AppSection(header = "Home") {
     @Composable
     override fun SectionLayout() {
         val scope = rememberCoroutineScope()
