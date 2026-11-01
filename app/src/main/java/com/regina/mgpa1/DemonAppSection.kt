@@ -1,5 +1,6 @@
 package com.regina.mgpa1
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,20 +40,22 @@ class DemonAppSection : AppSection("Demon List") {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    color = MaterialTheme.colorScheme.background
+                )
         ) {
-            // Render a header on the top of the section to state the header
+            // Render a header on the top of the section to state the title
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = header,
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Render the list
             if (levelsList.value.isNotEmpty())
@@ -62,13 +65,12 @@ class DemonAppSection : AppSection("Demon List") {
             else
             {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
                         text = "Loading levels...",
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
@@ -82,13 +84,13 @@ class DemonAppSection : AppSection("Demon List") {
 @Composable
 fun LevelList(levels: List<Level>) {
     LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .border(
                 width = 1.dp,
-                color = Color.White
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
+                color = MaterialTheme.colorScheme.onBackground
+            )
     ) {
         //Hi!!! So, for now i made this into a lazy column and it just loads in a text. I
         //tried my best to optimise loading the list. Just saying, theres about 1k+ levels.
@@ -128,7 +130,7 @@ fun LevelCard(level: Level) {
         else {
             Text(
                 text = "Image failed to load.",
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
         Row(
@@ -136,17 +138,17 @@ fun LevelCard(level: Level) {
         ) {
             Text(
                 text = "#${level.position} - ${level.name}",
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column() {
                 Text(
                     text = "Published by: ${levelDetails?.publisher?.global_name}",
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "Verified by: ${levelDetails?.verifications[0]?.submitted_by?.global_name}",
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
