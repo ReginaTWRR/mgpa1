@@ -1,5 +1,3 @@
-import org.gradle.internal.impldep.org.joda.time.DateTime
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)

@@ -79,7 +79,7 @@ suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
 //These funcs are random, un categorised functions.
 
 //This function gets a random level from the level list. Used in the Higher Lower game.
-suspend fun GetRandomLevel(): Level {
+suspend fun getRandomLevel(): Level {
     return GetLevelList().random()
 }
 

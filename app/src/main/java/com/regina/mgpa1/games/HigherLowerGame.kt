@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -38,103 +40,144 @@ import androidx.core.graphics.toColorInt
 import coil.compose.AsyncImage
 import com.regina.mgpa1.AppSection
 import com.regina.mgpa1.GetLevelThumbnail
-import com.regina.mgpa1.GetRandomLevel
+import com.regina.mgpa1.getRandomLevel
 import com.regina.mgpa1.Level
 import com.regina.mgpa1.R
+import kotlinx.coroutines.launch
 
 //==CLASSES
 
 //A class that implements the Higher Lower game
-class HigherLowerGame : AppSection("Higher/Lower"){
+class HigherLowerGame : AppSection(header = "Higher/Lower") {
     @Preview
     @Composable
     override fun SectionLayout() {
+        val scope = rememberCoroutineScope()
+
         // Get the 2 random levels; need to use produceState() because
         // GetRandomLevel() can only be called in a coroutine
         val levels = produceState(
             initialValue = emptyList()
         ) {
-            value = listOf(GetRandomLevel(), GetRandomLevel())
+            value = listOf(getRandomLevel(), getRandomLevel())
         }.value
 
-        if (levels.isNotEmpty())
-        {
-            val knownLevel = levels[0]
-            val unknownLevel = levels[1]
-
-            var shouldShowPanel by remember {
-                mutableStateOf(value = false)
-            }
-
-            var streak by remember {
-                mutableIntStateOf(value = 0)
-            }
-
-            // Used to overlay the ChoiceButtons over everything else
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                //Base box
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ){
-                    //Modifier Values(I placed box mod here cus the weight var is only accesible in the column)
-                    val boxModifier: Modifier = Modifier
-                        .weight(0.5f)
-                        .background(Color("#2E2E5A".toColorInt()))
-                        .border(
-                            width = 2.dp,
-                            color = Color("#252535".toColorInt())
-                        )
-                        .fillMaxWidth()
-
-                    //Stat tracker region
-                    Box(
-                        modifier = Modifier
-                            .weight(0.08f)
-                            .background(Color("#1f2154".toColorInt()))
-                            .fillMaxWidth()
-                    )
-                    {
-                        Text(
-                            text = "Streak: $streak",
-                            fontSize = 30.sp
-                        )
-                    }
-
-                    //Known Region
-                    KnownRegion(boxModifier, knownLevel)
-
-                    //Unknown Region
-                    UnknownRegion(
-                        boxModifier, unknownLevel,
-                        onClick = {
-                            shouldShowPanel = true
-                        }
-                    )
-                }
-
-                if (shouldShowPanel) {
-                    ChoicePanel()
-                }
-            }
+        if (levels.isEmpty()) {
+            RenderMessage(text = "Loading game...")
+            return
         }
-        else
-        {
-            Box(
-                contentAlignment = Alignment.Center,
+
+        // Should use rememberSaveable instead.
+        var knownLevel by remember {
+            mutableStateOf(value = levels[0])
+        }
+
+        // To revisit later and write our own Saver for this data class.
+        var unknownLevel by remember {
+            mutableStateOf(value = levels[1])
+        }
+
+        val knownPos = knownLevel.position
+        val unknownPos = unknownLevel.position
+
+        if (knownPos == null || unknownPos == null) {
+            RenderMessage(text = "Game failed to load.")
+            return
+        }
+
+        var UIUnknownPos by remember {
+            mutableIntStateOf(value = -1)
+        }
+
+        var streak by rememberSaveable() {
+            mutableIntStateOf(value = 0)
+        }
+
+        var shouldShowPanel by remember {
+            mutableStateOf(value = false)
+        }
+
+        // Used to overlay the ChoiceButtons over everything else
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            //Base box
+            Column(
                 modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "Loading game...",
-                    style = MaterialTheme.typography.titleLarge
+            ){
+                //Modifier Values(I placed box mod here cus the weight var is only accesible in the column)
+                val boxModifier: Modifier = Modifier
+                    .weight(0.5f)
+                    .background(Color("#2E2E5A".toColorInt()))
+                    .border(
+                        width = 2.dp,
+                        color = Color("#252535".toColorInt())
+                    )
+                    .fillMaxWidth()
+
+                //Stat tracker region
+                Box(
+                    modifier = Modifier
+                        .weight(0.08f)
+                        .background(Color("#1f2154".toColorInt()))
+                        .fillMaxWidth()
+                )
+                {
+                    Text(
+                        text = "Streak: $streak",
+                        fontSize = 30.sp
+                    )
+                }
+
+                //Known Region
+                KnownRegion(boxModifier, knownLevel, knownPos)
+
+                //Unknown Region
+                UnknownRegion(
+                    boxModifier,
+                    unknownLevel, UIUnknownPos,
+                    onClick = {
+                        shouldShowPanel = true
+                    }
+                )
+            }
+
+            if (shouldShowPanel) {
+                ChoicePanel(
+                    onChoiceMade = { choice ->
+                        val isChoiceCorrect = evaluateChoice(
+                            choice, unknownPos, knownPos
+                        )
+
+                        // Respond to the evaluation
+                        if (isChoiceCorrect) {
+                            // Reveal the position
+                            //UIUnknownPos = unknownPos
+
+                            // Go next round
+                            knownLevel = unknownLevel
+                            scope.launch {unknownLevel = getRandomLevel()}
+
+                            // Increase streak
+                            ++streak
+                        }
+                        else {
+                            // Reveal the position
+                            //UIUnknownPos = unknownPos
+
+                            // Reset streak
+                            streak = 0
+                        }
+
+                        shouldShowPanel = false
+                    }
                 )
             }
         }
     }
 }
 
-//An enum class that defines the choices that a user can make
+//An enum class that defines the choices a user can make
 enum class UserChoice() {
     NONE, HIGHER, LOWER
 }
@@ -143,7 +186,7 @@ enum class UserChoice() {
 
 //A Composable function that renders the known region
 @Composable
-fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level) {
+fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -158,7 +201,7 @@ fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level) {
 
         LevelInfo(
             levelName = knownLevel.name,
-            position = knownLevel.position ?: -1
+            position = knownPos
         )
     }
 }
@@ -166,7 +209,9 @@ fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level) {
 //A Composable function that renders the unknown region
 @Composable
 fun ColumnScope.UnknownRegion(
-    modifier: Modifier, unknownLevel: Level, onClick: () -> Unit
+    modifier: Modifier,
+    unknownLevel: Level, UIUnknownPos: Int,
+    onClick: () -> Unit
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -185,7 +230,7 @@ fun ColumnScope.UnknownRegion(
 
         LevelInfo(
             levelName = unknownLevel.name,
-            position = -1
+            position = UIUnknownPos
         )
     }
 }
@@ -211,7 +256,7 @@ fun LevelInfo(levelName: String, position: Int) {
 
 //A Composable function that presents the user with higher / lower choice buttons
 @Composable
-fun ChoicePanel() {
+fun ChoicePanel(onChoiceMade: (UserChoice) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -220,7 +265,7 @@ fun ChoicePanel() {
         // Higher button
         ChoiceButton(
             onButtonClick = {
-
+                onChoiceMade(UserChoice.HIGHER)
             },
             painterID = R.drawable.keyboard_arrow_up,
             contentDescription = "Higher"
@@ -231,7 +276,7 @@ fun ChoicePanel() {
         // Lower button
         ChoiceButton(
             onButtonClick = {
-
+                onChoiceMade(UserChoice.LOWER)
             },
             painterID = R.drawable.keyboard_arrow_down,
             contentDescription = "Lower"
@@ -265,5 +310,31 @@ fun ChoiceButton(
             contentDescription = contentDescription,
             modifier = Modifier.fillMaxSize(fraction = 0.75f)
         )
+    }
+}
+
+//A function to show the user a message
+@Composable
+fun RenderMessage(text: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
+}
+
+//A function that evaluates whether the user's choice is correct
+fun evaluateChoice(
+    choice: UserChoice, unknownPos: Int, knownPos: Int
+): Boolean {
+    // Note: We are evaluating RANKINGS. Higher pos = smaller int
+    return when (choice) {
+        UserChoice.HIGHER -> (unknownPos < knownPos)
+        UserChoice.LOWER -> (unknownPos > knownPos)
+        else -> false
     }
 }
