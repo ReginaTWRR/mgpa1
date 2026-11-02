@@ -10,6 +10,7 @@ import java.time.Instant
 import java.net.URL
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import java.io.StreamTokenizer
 import java.time.LocalDateTime
 import kotlin.uuid.Uuid
 
@@ -89,14 +90,21 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
     val prefix = "https://img.youtube.com/vi/"
     val suffixHq = "/hqdefault.jpg"
     val suffixMaxRes = "/maxresdefault.jpg"
-    val splitLink = YTLink.split("=")
-    if(splitLink.size !in 2..2){
-        //You should be using links like https://www.youtube.com/watch?v=JqZrKtzZk7U where theres only one v=
-        //Check if the split link is a bad size. if it is, then we return this.
-        println("Attempted to load invalid link at BUILDYTIWEBIMAGE $YTLink")
-        //Return err image
-        return "https://img.youtube.com/vi/%3CVIDEO_ID%3E/hqdefault.jpg"
+    //Check what kind of link this is
+    var splitLink: List<String> = listOf()
+    splitLink = YTLink.split("=","&","youtu.be/","live/","?si=","?is")
+    println(splitLink)
+
+    val listofIllegalChars = listOf<String>("!","&","@","#","-")
+    //Verify Video ID
+    for (chars in listofIllegalChars) {
+        if(splitLink[1].contains(chars)){
+            println("Attempted to load invalid link at BUILDYTIWEBIMAGE $YTLink")
+            //Return err image
+            return "https://img.youtube.com/vi/%3CVIDEO_ID%3E/hqdefault.jpg"
+        }
     }
+
     //To do: for safety: make this valid the yt link.
     return if(useMaxRes){
         "$prefix${splitLink[1]}$suffixMaxRes"
