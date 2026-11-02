@@ -68,12 +68,12 @@ class HigherLowerGame : AppSection(header = "Higher/Lower") {
         }
 
         // Should use rememberSaveable instead.
-        var knownLevel by remember {
+        var knownLevel by rememberSaveable() {
             mutableStateOf(value = levels[0])
         }
 
         // To revisit later and write our own Saver for this data class.
-        var unknownLevel by remember {
+        var unknownLevel by rememberSaveable() {
             mutableStateOf(value = levels[1])
         }
 

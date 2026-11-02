@@ -2,7 +2,9 @@
 
 package com.regina.mgpa1
 
+import android.os.Parcelable
 import kotlinx.datetime.Instant
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 //==ENUMS
@@ -20,6 +22,7 @@ enum class STATUS{
 //Refer to the ARDEL/other APIS API for more details on these classes. I'll leave a comment as to where these came from
 //List all Levels
 @Serializable
+@Parcelize
 data class Level(
     val id : String,
     val name : String,
@@ -41,7 +44,8 @@ data class Level(
     val gddl_tier: Float ?= null,
     val nlw_tier: String ?= null,
     val completed_by_user: Boolean ?= null
-)
+) : Parcelable
+
 //Aredl Get Level Details
 @Serializable
 data class User(
