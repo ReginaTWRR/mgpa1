@@ -2,6 +2,8 @@ package com.regina.mgpa1.games
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
@@ -29,9 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import coil.compose.AsyncImage
 import com.regina.mgpa1.AppSection
 import com.regina.mgpa1.GetLevelThumbnail
@@ -75,11 +78,21 @@ class HigherLowerGame : AppSection("Higher/Lower"){
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ){
+                    //Modifier Values(I placed box mod here cus the weight var is only accesible in the column)
+                    val boxModifier: Modifier = Modifier
+                        .weight(0.5f)
+                        .background(Color("#2E2E5A".toColorInt()))
+                        .border(
+                            width = 2.dp,
+                            color = Color("#252535".toColorInt())
+                        )
+                        .fillMaxWidth()
+
                     //Stat tracker region
                     Box(
                         modifier = Modifier
-                            .weight(0.1f)
-                            .background(Color.Blue)
+                            .weight(0.08f)
+                            .background(Color("#1f2154".toColorInt()))
                             .fillMaxWidth()
                     )
                     {
@@ -90,25 +103,20 @@ class HigherLowerGame : AppSection("Higher/Lower"){
                     }
 
                     //Known Region
-                    LevelOption(
-                        knownLevel,
+                    KnownRegion(boxModifier, knownLevel)
+
+                    //Unknown Region
+                    UnknownRegion(
+                        boxModifier, unknownLevel,
                         onClick = {
                             shouldShowPanel = true
                         }
                     )
-
-                    //Unknown Region
-                    LevelOption(
-                        unknownLevel,
-                        onClick = {
-                            shouldShowPanel = true
-                        },
-                        isPositionKnown = false
-                    )
                 }
 
-                if (shouldShowPanel)
+                if (shouldShowPanel) {
                     ChoicePanel()
+                }
             }
         }
         else
@@ -126,53 +134,79 @@ class HigherLowerGame : AppSection("Higher/Lower"){
     }
 }
 
+//An enum class that defines the choices that a user can make
+enum class UserChoice() {
+    NONE, HIGHER, LOWER
+}
+
 //==FUNCTIONS
 
-//A Composable function that renders a level option. Need to pass ColumnScope to
-// the function because .weight() can only work in a Column or Row
+//A Composable function that renders the known region
 @Composable
-fun ColumnScope.LevelOption(
-    level: Level, onClick: () -> Unit, isPositionKnown: Boolean = true
+fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ){
+        // Loading the background image
+        AsyncImage(
+            model = GetLevelThumbnail(LevelID = knownLevel.level_id),
+            contentDescription = "Thumbnail",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
+
+        LevelInfo(
+            levelName = knownLevel.name,
+            position = knownLevel.position ?: -1
+        )
+    }
+}
+
+//A Composable function that renders the unknown region
+@Composable
+fun ColumnScope.UnknownRegion(
+    modifier: Modifier, unknownLevel: Level, onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .weight(0.5f)
-            .background(Color.Red)
-            .fillMaxWidth()
+        contentAlignment = Alignment.Center,
+        modifier = modifier
             .clickable() {
                 onClick()
             }
     ){
         // Loading the background image
         AsyncImage(
-            model = GetLevelThumbnail(LevelID = level.level_id),
+            model = GetLevelThumbnail(LevelID = unknownLevel.level_id),
             contentDescription = "Thumbnail",
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize()
         )
 
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = level.name,
-                fontSize = 40.sp,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.background
-                    )
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = if (isPositionKnown) "#${level.position}" else "#???",
-                fontSize = 40.sp,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.background
-                    )
-            )
-        }
+        LevelInfo(
+            levelName = unknownLevel.name,
+            position = -1
+        )
     }
+}
+
+//A Composable function that renders level information
+@Composable
+fun LevelInfo(levelName: String, position: Int) {
+    var positionValue = position.toString()
+
+    if (position < 0)
+    {
+        positionValue = "???"
+    }
+
+    Text(
+        text = "$levelName #$positionValue",
+        fontSize = 40.sp,
+        lineHeight = 40.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
+    )
 }
 
 //A Composable function that presents the user with higher / lower choice buttons
@@ -185,6 +219,9 @@ fun ChoicePanel() {
     ) {
         // Higher button
         ChoiceButton(
+            onButtonClick = {
+
+            },
             painterID = R.drawable.keyboard_arrow_up,
             contentDescription = "Higher"
         )
@@ -193,6 +230,9 @@ fun ChoicePanel() {
 
         // Lower button
         ChoiceButton(
+            onButtonClick = {
+
+            },
             painterID = R.drawable.keyboard_arrow_down,
             contentDescription = "Lower"
         )
@@ -201,12 +241,18 @@ fun ChoicePanel() {
 
 //A Composable function that defines the appearance of a choice button
 @Composable
-fun ChoiceButton(@DrawableRes painterID: Int, contentDescription: String) {
-    FilledIconButton(
+fun ChoiceButton(
+    onButtonClick: () -> Unit, @DrawableRes painterID: Int, contentDescription: String
+) {
+    OutlinedIconButton(
         onClick = {
-
+            onButtonClick()
         },
-        colors = IconButtonDefaults.filledIconButtonColors(
+        border = BorderStroke(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.onBackground
+        ),
+        colors = IconButtonDefaults.outlinedIconButtonColors(
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground
         ),

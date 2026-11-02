@@ -32,7 +32,7 @@ import com.regina.mgpa1.AppSection
 import com.regina.mgpa1.GetLevelThumbnail
 import kotlinx.coroutines.withContext
 
-
+// THIS CLASS IS NOT IN USE
 class Higher_LowerGame : AppSection("Higher/Lower"){
     @Preview
     @Composable
