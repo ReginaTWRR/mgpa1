@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.regina.mgpa1.games.HigherLowerGame
@@ -120,11 +121,7 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
     // Biggest rendering body
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                color = MaterialTheme.colorScheme.background
-            )
+        modifier = Modifier.fillMaxSize()
     ) {
         // Render a header on the top of the section to state the title
         Box(
@@ -154,6 +151,7 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
                         onGameClick(game)
                     }
                 )
+
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -177,7 +175,7 @@ fun GameCard(gameName: String, onClick: () -> Unit) {
         ),
         modifier = Modifier
             .fillMaxWidth(fraction = 0.875f)
-            .fillMaxHeight(fraction = 0.25f)
+            .height(150.dp)
     ) {
         Text(
             text = gameName,

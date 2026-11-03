@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -220,6 +222,11 @@ fun ColumnScope.UnknownRegion(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(size = 10.dp)
+            )
             .clickable() {
                 onClick()
             }
@@ -242,19 +249,22 @@ fun ColumnScope.UnknownRegion(
 //A Composable function that renders level information
 @Composable
 fun LevelInfo(levelName: String, position: Int) {
-    var positionValue = position.toString()
-
-    if (position < 0)
-    {
-        positionValue = "???"
-    }
+    val positionValue = if (position > 0) position.toString() else "???"
 
     Text(
         text = "$levelName #$positionValue",
         fontSize = 40.sp,
         lineHeight = 40.sp,
         textAlign = TextAlign.Center,
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .widthIn(max = 300.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(size = 10.dp)
+            )
+            .background(color = MaterialTheme.colorScheme.background)
+            .padding(all = 10.dp)
     )
 }
 
@@ -306,8 +316,8 @@ fun ChoiceButton(
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
         modifier = Modifier
-            .fillMaxWidth(fraction = 0.5f)
-            .height(200.dp)
+            .fillMaxWidth(fraction = 0.2f)
+            .height(85.dp)
     ) {
         Icon(
             painter = painterResource(id = painterID),
