@@ -1,5 +1,6 @@
 package com.regina.mgpa1
 
+import android.bluetooth.BluetoothHidDeviceAppQosSettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,11 @@ class GamesAppSection : AppSection(header = "Games") {
             mutableStateOf<GamesPage?>(value = null)
         }
 
+        // Same, need to declare overviewPage first, dependency in higher lower game.
+        var overviewPage by remember {
+            mutableStateOf<GamesPage?>(value = null)
+        }
+
         // Define all games
         val games by remember {
             mutableStateOf(value = listOf<Game>(
@@ -46,34 +52,48 @@ class GamesAppSection : AppSection(header = "Games") {
                 Game(
                     name = "HIGHER OR LOWER",
                     page = GamesPage(
+                        code = PageCode.HIGHERLOWER,
                         content = {
-                            GameHigherLower()
+                            GameHigherLower(
+                                onGameOver = {
+                                    currentPage = overviewPage
+                                }
+                            )
                         }
                     )
                 )
             ))
         }
+
         // Define the overview page
-        val overviewPage by remember {
-            mutableStateOf(value = GamesPage(
-                content = {
-                    GameOverview(
-                        header, games,
-                        onGameClick = { game ->
-                            currentPage = game.page
-                        }
-                    )
-                }
-            ))
+        overviewPage = GamesPage(
+            code = PageCode.OVERVIEW,
+            content = {
+                GameOverview(
+                    header, games,
+                    onGameClick = { game ->
+                        currentPage = game.page
+                    }
+                )
+            }
+        )
+
+        // If page is null, "initialise" it to overviewPage.
+        if (currentPage == null) {
+            currentPage = overviewPage
         }
 
-        // If currentPage is null, "initialise" it to overviewPage.
-        (currentPage ?: overviewPage).content()
+        // Store local reference to currentPage (Else smart cast doesn't work)
+        val page = currentPage
+
+        page ?: return
+        page.content()
     }
 }
 
 //A data class that defines a games page
 data class GamesPage(
+    val code: PageCode,
     val content: @Composable () -> Unit
 ) {
 
@@ -85,6 +105,11 @@ data class Game(
     val page: GamesPage
 ) {
 
+}
+
+//An enum class that stores a code for each page, used to reliably identify a page
+enum class PageCode {
+    OVERVIEW, HIGHERLOWER
 }
 
 //==FUNCTIONS
@@ -137,8 +162,8 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
 
 //A Composable function that renders the higher lower game
 @Composable
-fun GameHigherLower() {
-    HigherLowerGame().SectionLayout()
+fun GameHigherLower(onGameOver: (hasWon: Boolean) -> Unit) {
+    HigherLowerGame(onGameOver).SectionLayout()
 }
 
 //A Composable function that defines a game card's appearance and function

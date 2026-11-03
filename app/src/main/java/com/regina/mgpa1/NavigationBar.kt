@@ -32,7 +32,7 @@ enum class NavDestination(
     val contentDescription: String,
     val section: AppSection
 ){
-    HOME("HOME", "Home", R.drawable.home_page_icon, "Home", HigherLowerGame()),
+    HOME("HOME", "Home", R.drawable.home_page_icon, "Home", HomeAppSection()),
     DEMON("DEMON", "Demon List", R.drawable.demon_page_icon, "Demon List", DemonAppSection()),
     GAMES("GAMES", "Games", R.drawable.games_page_icon, "Games", GamesAppSection()),
     LOGIN("LOGIN", "Login", R.drawable.login_page_icon, "Login", LoginAppSection())
