@@ -94,7 +94,7 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
     splitLink = YTLink.split("=","&","youtu.be/","live/","?si=","?is")
     println(splitLink)
 
-    val listofIllegalChars = listOf<String>("!","&","@","#","-")
+    val listofIllegalChars = listOf<String>("!","&","@","#")
     //Verify Video ID
     for (chars in listofIllegalChars) {
         if(splitLink[1].contains(chars)){
