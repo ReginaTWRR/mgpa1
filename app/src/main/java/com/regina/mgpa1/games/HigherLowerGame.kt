@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -196,7 +197,7 @@ fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-    ){
+    ) {
         // Loading the background image
         AsyncImage(
             model = GetLevelThumbnail(LevelID = knownLevel.level_id),
@@ -230,7 +231,7 @@ fun ColumnScope.UnknownRegion(
             .clickable() {
                 onClick()
             }
-    ){
+    ) {
         // Loading the background image
         AsyncImage(
             model = GetLevelThumbnail(LevelID = unknownLevel.level_id),
@@ -316,8 +317,8 @@ fun ChoiceButton(
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
         modifier = Modifier
-            .fillMaxWidth(fraction = 0.2f)
-            .height(85.dp)
+            .width(100.dp)
+            .height(100.dp)
     ) {
         Icon(
             painter = painterResource(id = painterID),
