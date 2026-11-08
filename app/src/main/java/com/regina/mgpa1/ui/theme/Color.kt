@@ -14,8 +14,10 @@ val Pink40 = Color(0xFF7D5260)
 
 //Light mode color palette
 val LightBackground = Color(0xFFDBDBDB)
-val LightText = Color(0xFF4A3000)
+val LightOnBackground = Color(0xFF4A3000)
+val LightOnSecondary = Color(0xFF8A5A00)
 
 //Dark mode color palette
 val DarkBackground = Color(0xFF242424)
-val DarkText = Color(0xFFFFBD43)
+val DarkOnBackground = Color(0xFFFFBD43)
+val DarkOnSecondary = Color(0xFFAA6F00)
