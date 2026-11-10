@@ -1,5 +1,6 @@
 package com.regina.mgpa1
 
+import android.R
 import java.io.IOException
 import java.io.StreamTokenizer
 import java.net.HttpURLConnection
@@ -15,7 +16,8 @@ val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat t
 //This is a data class meant for this file.
 data class APIResponse(
     var responseCode:Int = -1, //the response code that the api returns
-    var content: String = "Unsuccessful" //the content that the api returns
+    var content: String = "Unsuccessful", //the content that the api returns
+    var URL : String = ""
 )
 
 //==API FUNCS
@@ -33,6 +35,7 @@ suspend fun getfromAPI(inputString : String): APIResponse{
             response.responseCode = responseCode
             if(responseCode !in 200..300){
                 response.content = responseMessage
+                response.URL = url.toString()
             }
             else{
                 //set response content to be the thing
@@ -44,6 +47,7 @@ suspend fun getfromAPI(inputString : String): APIResponse{
                         inputLine = it.readLine()
                     }
                    response.content = _response.toString()
+                   response.URL = url.toString()
                 }
             }
         }
