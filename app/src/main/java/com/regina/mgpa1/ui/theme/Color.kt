@@ -1,4 +1,4 @@
-package com.regina.mgpa1.ui.theme
+    package com.regina.mgpa1.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
