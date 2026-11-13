@@ -1,4 +1,4 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.sections
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box

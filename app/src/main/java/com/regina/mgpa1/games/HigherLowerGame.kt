@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -40,14 +39,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.regina.mgpa1.AppSection
-import com.regina.mgpa1.GetLevelThumbnail
-import com.regina.mgpa1.getRandomLevel
-import com.regina.mgpa1.Level
+import com.regina.mgpa1.sections.AppSection
+import com.regina.mgpa1.logic.GetLevelThumbnail
+import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.R
-import com.regina.mgpa1.RenderMessage
-import kotlinx.coroutines.launch
+import com.regina.mgpa1.logic.RenderMessage
+import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
 
@@ -59,18 +58,11 @@ class HigherLowerGame(
     override fun SectionLayout() {
         val scope = rememberCoroutineScope()
 
-        // Get the 2 random levels; need to use produceState() because
-        // GetRandomLevel() can only be called in a coroutine
-        val levels = produceState(
-            initialValue = emptyList()
-        ) {
-            value = listOf(getRandomLevel(), getRandomLevel())
-        }.value
-
-        if (levels.isEmpty()) {
-            RenderMessage(text = "Loading game...")
-            return
-        }
+        // Access the view model and get the 2 random levels
+        val viewModel = viewModel<DemonListViewModel>()
+        val levels = listOf<Level>(
+            viewModel.GetRandomLevel(), viewModel.GetRandomLevel()
+        )
 
         var knownLevel by rememberSaveable() {
             mutableStateOf(value = levels[0])
@@ -88,7 +80,7 @@ class HigherLowerGame(
             return
         }
 
-        var UIUnknownPos by remember {
+        var uiUnknownPos by remember {
             mutableIntStateOf(value = -1)
         }
 
@@ -138,7 +130,7 @@ class HigherLowerGame(
                 //Unknown Region
                 UnknownRegion(
                     boxModifier,
-                    unknownLevel, UIUnknownPos,
+                    unknownLevel, uiUnknownPos,
                     onClick = {
                         shouldShowPanel = true
                     }
@@ -159,7 +151,7 @@ class HigherLowerGame(
 
                             // Go next round
                             knownLevel = unknownLevel
-                            scope.launch {unknownLevel = getRandomLevel()}
+                            unknownLevel = viewModel.GetRandomLevel()
 
                             // Increase streak
                             ++streak

@@ -1,4 +1,4 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.sections
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,12 +15,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.logic.BuildYTWebImage
+import com.regina.mgpa1.logic.GetLevelDetails
+import com.regina.mgpa1.logic.GetLevelList
+import com.regina.mgpa1.logic.Level
+import com.regina.mgpa1.logic.LevelDetails
+import com.regina.mgpa1.logic.RenderLevelName
+import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
 
@@ -29,12 +39,9 @@ class DemonAppSection : AppSection(header = "Demon List") {
     @Preview
     @Composable
     override fun SectionLayout() {
-        // Get the list of all levels using the API layer's GetLevelList() function
-        val levelsList = produceState(
-            initialValue = emptyList<Level>()
-        ) {
-            value = GetLevelList()
-        }.value
+        // Access the view model and get the level list
+        val viewModel = viewModel<DemonListViewModel>()
+        val levelList by viewModel.levelList.collectAsState()
 
         // Biggest rendering body
         Column(
@@ -59,9 +66,9 @@ class DemonAppSection : AppSection(header = "Demon List") {
             Spacer(modifier = Modifier.height(10.dp))
 
             // Render the list
-            if (levelsList.isNotEmpty())
+            if (levelList.isNotEmpty())
             {
-                LevelList(levelsList)
+                RenderLevelList(levels = levelList)
             }
             else
             {
@@ -83,7 +90,7 @@ class DemonAppSection : AppSection(header = "Demon List") {
 
 //A Composable function that renders all levels in the passed list
 @Composable
-fun LevelList(levels: List<Level>) {
+fun RenderLevelList(levels: List<Level>) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -138,7 +145,7 @@ fun LevelCard(level: Level) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RenderLevelName(level)
+            RenderLevelName(level, modifier = Modifier)
             Spacer(modifier = Modifier.width(10.dp))
 
             Column() {

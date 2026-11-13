@@ -1,4 +1,4 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.sections
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,14 +1,12 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.logic
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -16,13 +14,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import com.regina.mgpa1.R
 //import androidx.navigation.NavHostController
 //import androidx.navigation.compose.NavHost
 //import androidx.navigation.compose.composable
-import com.regina.mgpa1.games.HigherLowerGame
+import com.regina.mgpa1.sections.AppSection
+import com.regina.mgpa1.sections.DemonAppSection
+import com.regina.mgpa1.sections.GamesAppSection
+import com.regina.mgpa1.sections.HomeAppSection
+import com.regina.mgpa1.sections.LoginAppSection
 import kotlinx.coroutines.launch
 
 //==CLASSES

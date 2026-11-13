@@ -1,6 +1,6 @@
 //This file is for storing the JSON data to object classes
 
-package com.regina.mgpa1
+package com.regina.mgpa1.logic
 
 import android.os.Parcelable
 import kotlinx.datetime.Instant

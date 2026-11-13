@@ -1,7 +1,6 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.logic
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,21 +12,14 @@ import androidx.compose.ui.Modifier
 
 //A Composable function to render a level's name and position
 @Composable
-fun RowScope.RenderLevelName(
+fun RenderLevelName(
     level: Level,
-    weight: Float = 0f
+    modifier: Modifier
 ) {
-    val text = "#${level.position} - ${level.name}"
-
-    if (weight > 0f) {
-        Text(
-            text = text,
-            modifier = Modifier.weight(weight)
-        )
-    }
-    else {
-        Text(text = text)
-    }
+    Text(
+        text = "#${level.position} - ${level.name}",
+        modifier = modifier
+    )
 }
 
 //A Composable function to show the user a message
@@ -43,4 +35,3 @@ fun RenderMessage(text: String) {
         )
     }
 }
-

@@ -1,4 +1,4 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.sections
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -30,7 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.logic.GetLevelThumbnail
+import com.regina.mgpa1.R
+import com.regina.mgpa1.logic.RenderLevelName
+import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
 
@@ -125,16 +129,9 @@ fun SearchBar() {
 //A Composable function that renders the demon of the day
 @Composable
 fun DemonOfTheDay() {
-    val demon = produceState<Level?>(
-        initialValue = null
-    ) {
-        value = getRandomLevel()
-    }.value
-
-    if (demon == null) {
-        RenderMessage(text = "Loading demon...")
-        return
-    }
+    // Access the view model and get a random demon
+    val viewModel = viewModel<DemonListViewModel>()
+    val demon = viewModel.GetRandomLevel()
 
     Column (
         horizontalAlignment = Alignment.Start,
@@ -161,7 +158,7 @@ fun DemonOfTheDay() {
         ) {
             RenderLevelName(
                 level = demon,
-                weight = 0.4f
+                modifier = Modifier.weight(1f)
             )
 
             Button(
@@ -172,9 +169,11 @@ fun DemonOfTheDay() {
                     containerColor = MaterialTheme.colorScheme.onBackground,
                     contentColor = MaterialTheme.colorScheme.background
                 ),
-                modifier = Modifier.weight(0.4f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(text = "WATCH GAMEPLAY")
+
+                Spacer(modifier = Modifier.weight(1f))
 
                 Icon(
                     painter = painterResource(id = R.drawable.play_circle),

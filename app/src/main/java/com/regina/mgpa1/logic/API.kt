@@ -1,12 +1,8 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.logic
 
-import android.R
 import java.io.IOException
-import java.io.StreamTokenizer
 import java.net.HttpURLConnection
 import java.net.URL
-import java.time.LocalDateTime
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 
@@ -81,11 +77,6 @@ suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
 
 //==OTHER FUNCS
 //These funcs are random, un categorised functions.
-
-//This function gets a random level from the level list. Used in the Higher Lower game.
-suspend fun getRandomLevel(): Level {
-    return GetLevelList().random()
-}
 
 //This function gets the thumbnail image off of youtube videos. please pass in the link properly.
 //this needs the yt vid id which usually comes after the v= in yt link
