@@ -46,6 +46,7 @@ import com.regina.mgpa1.GetLevelThumbnail
 import com.regina.mgpa1.getRandomLevel
 import com.regina.mgpa1.Level
 import com.regina.mgpa1.R
+import com.regina.mgpa1.RenderMessage
 import kotlinx.coroutines.launch
 
 //==CLASSES
@@ -71,12 +72,10 @@ class HigherLowerGame(
             return
         }
 
-        // Should use rememberSaveable instead.
         var knownLevel by rememberSaveable() {
             mutableStateOf(value = levels[0])
         }
 
-        // To revisit later and write our own Saver for this data class.
         var unknownLevel by rememberSaveable() {
             mutableStateOf(value = levels[1])
         }
@@ -324,20 +323,6 @@ fun ChoiceButton(
             painter = painterResource(id = painterID),
             contentDescription = contentDescription,
             modifier = Modifier.fillMaxSize(fraction = 0.75f)
-        )
-    }
-}
-
-//A function to show the user a message
-@Composable
-fun RenderMessage(text: String) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleLarge
         )
     }
 }

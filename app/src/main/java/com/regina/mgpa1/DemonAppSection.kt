@@ -132,31 +132,18 @@ fun LevelCard(level: Level) {
             )
         }
         else {
-            Text(
-                text = "Image failed to load.",
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            Text(text = "Image failed to load.")
         }
 
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "#${level.position} - ${level.name}",
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
+            RenderLevelName(level)
             Spacer(modifier = Modifier.width(10.dp))
 
             Column() {
-                Text(
-                    text = "Published by: ${levelDetails?.publisher?.global_name}",
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = "Verified by: ${levelDetails?.verifications[0]?.submitted_by?.global_name}",
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Text(text = "Published by: ${levelDetails?.publisher?.global_name}")
+                Text(text = "Verified by: ${levelDetails?.verifications[0]?.submitted_by?.global_name}")
             }
         }
     }
