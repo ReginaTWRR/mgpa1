@@ -24,22 +24,24 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.R
+import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.logic.NavDestination
 import com.regina.mgpa1.logic.RenderMessage
-import com.regina.mgpa1.logic.SectionNavigation
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel
+import kotlinx.coroutines.launch
 
 //==CLASSES
 
@@ -97,7 +99,7 @@ class HomeAppSection(
                     )
                 } else {
                     Spacer(modifier = Modifier.height(10.dp))
-                    RandomDemon()
+                    RandomDemon(listViewModel)
                     Spacer(modifier = Modifier.height(10.dp))
                     DailyChallenge(requestSectionChange)
                 }
@@ -166,10 +168,17 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 
 //A Composable function that renders a random demon
 @Composable
-fun RandomDemon() {
+fun RandomDemon(listViewModel: DemonListViewModel) {
+    val scope = rememberCoroutineScope()
+
     // Access the view model and get a random demon
-    val viewModel = viewModel<DemonListViewModel>()
-    val demon = viewModel.getRandomLevel()
+    // Need to collect the level list as a state so that this recomposes when the list
+    // is done loading in DemonListViewModel. Else, UI will not be updated when the list
+    // actually loads.
+    val demonList by listViewModel.levelList.collectAsState()
+    val demon = demonList.randomOrNull()
+
+    val uriHandler = LocalUriHandler.current
 
     if (demon == null)
     {
@@ -188,14 +197,11 @@ fun RandomDemon() {
             text = "Check out this demon!",
             style = MaterialTheme.typography.titleMedium
         )
-
         Spacer(modifier = Modifier.height(10.dp))
-
         AsyncImage(
             model = GetLevelThumbnail(LevelID = demon.level_id),
             contentDescription = "${demon.name} thumbnail"
         )
-
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(
@@ -210,7 +216,12 @@ fun RandomDemon() {
 
             Button(
                 onClick = {
-
+                    // Go to the verification (gameplay) Youtube video
+                    scope.launch {
+                        val levelDetails = GetLevelDetails(LevelID = demon.level_id)
+                        val videoURL = levelDetails.verifications[0].video_url
+                        uriHandler.openUri(videoURL)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.onBackground,
@@ -219,9 +230,7 @@ fun RandomDemon() {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(text = "WATCH GAMEPLAY")
-
                 Spacer(modifier = Modifier.weight(1f))
-
                 Icon(
                     painter = painterResource(id = R.drawable.play_circle),
                     contentDescription = "Play Button"

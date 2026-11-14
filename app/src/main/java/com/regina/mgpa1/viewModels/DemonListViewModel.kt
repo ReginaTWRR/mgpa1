@@ -2,8 +2,10 @@ package com.regina.mgpa1.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.GetLevelList
 import com.regina.mgpa1.logic.Level
+import com.regina.mgpa1.logic.LevelDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -18,14 +20,10 @@ class DemonListViewModel : ViewModel() {
     val levelList = _levelList.asStateFlow()
 
     init {
-        LoadLevelList()
+        getLevelList()
     }
 
-    fun getRandomLevel(): Level? {
-        return _levelList.value.randomOrNull()
-    }
-
-    private fun LoadLevelList() {
+    private fun getLevelList() {
         viewModelScope.launch {
             // Get the list of all levels using the API layer's GetLevelList() function
             _levelList.value = GetLevelList()

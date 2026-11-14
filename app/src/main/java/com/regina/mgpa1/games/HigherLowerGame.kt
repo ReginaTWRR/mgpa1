@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,8 +59,10 @@ class HigherLowerGame(
     override fun SectionLayout() {
         // Access the view model and get the 2 random levels
         val viewModel = viewModel<DemonListViewModel>()
+
+        val levelList by viewModel.levelList.collectAsState()
         val levels = listOf<Level?>(
-            viewModel.getRandomLevel(), viewModel.getRandomLevel()
+            levelList.randomOrNull(), levelList.randomOrNull()
         )
 
         var knownLevel by rememberSaveable() {
@@ -164,7 +167,7 @@ class HigherLowerGame(
 
                             // Go next round
                             knownLevel = unknownLevel
-                            unknownLevel = viewModel.getRandomLevel()
+                            unknownLevel = levelList.randomOrNull()
 
                             // Increase streak
                             ++streak
