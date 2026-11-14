@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.regina.mgpa1.logic.NavigationBar
+import com.regina.mgpa1.logic.SectionNavigation
 import com.regina.mgpa1.ui.theme.Mgpa1Theme
 
 //==CLASSES
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 //So, Im keeping this function to reuse in the preview func and the main func
 @Composable
 fun Content(){
-    NavigationBar()
+    SectionNavigation().NavigationBar()
 }
 
 @Preview(showBackground = true)

@@ -23,26 +23,30 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelName
+import com.regina.mgpa1.logic.NavDestination
 import com.regina.mgpa1.logic.RenderMessage
+import com.regina.mgpa1.logic.SectionNavigation
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel
 
 //==CLASSES
 
 //A class that implements the Home section of the App
-class HomeAppSection : AppSection(header = "Home") {
+class HomeAppSection(
+    val requestSectionChange: (newSection: NavDestination) -> Unit
+) : AppSection(header = "Home") {
     @Composable
     override fun SectionLayout() {
         // Here, access the DemonListViewModel and pass it into the DemonSearchViewModel
@@ -57,7 +61,7 @@ class HomeAppSection : AppSection(header = "Home") {
 
         val searchText = searchViewModel.searchText.collectAsState().value
         val isSearching = searchViewModel.isSearching.collectAsState().value
-        val levelList = searchViewModel.levelList.collectAsState(initial = emptyList()).value
+        val levelList by searchViewModel.levelList.collectAsState(initial = emptyList())
 
         // Biggest rendering body
         Box(
@@ -93,9 +97,9 @@ class HomeAppSection : AppSection(header = "Home") {
                     )
                 } else {
                     Spacer(modifier = Modifier.height(10.dp))
-                    DemonOfTheDay()
+                    RandomDemon()
                     Spacer(modifier = Modifier.height(10.dp))
-                    DailyChallenge()
+                    DailyChallenge(requestSectionChange)
                 }
             }
         }
@@ -160,9 +164,9 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
     }
 }
 
-//A Composable function that renders the demon of the day
+//A Composable function that renders a random demon
 @Composable
-fun DemonOfTheDay() {
+fun RandomDemon() {
     // Access the view model and get a random demon
     val viewModel = viewModel<DemonListViewModel>()
     val demon = viewModel.getRandomLevel()
@@ -181,7 +185,7 @@ fun DemonOfTheDay() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Demon of the Day",
+            text = "Check out this demon!",
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -189,7 +193,7 @@ fun DemonOfTheDay() {
 
         AsyncImage(
             model = GetLevelThumbnail(LevelID = demon.level_id),
-            contentDescription = "Demon"
+            contentDescription = "${demon.name} thumbnail"
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -229,7 +233,7 @@ fun DemonOfTheDay() {
 
 //A Composable function that renders the daily challenge
 @Composable
-fun DailyChallenge() {
+fun DailyChallenge(requestSectionChange: (NavDestination) -> Unit) {
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth()
@@ -247,16 +251,14 @@ fun DailyChallenge() {
                 painter = painterResource(id = R.drawable.stadia_controller),
                 contentDescription = "Game Icon"
             )
-
             Spacer(modifier = Modifier.width(10.dp))
-
             Text(text = "Higher or Lower")
-
             Spacer(modifier = Modifier.width(10.dp))
 
             Button(
                 onClick = {
-
+                    // Go to the Games section
+                    requestSectionChange(NavDestination.GAMES)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.onBackground,
