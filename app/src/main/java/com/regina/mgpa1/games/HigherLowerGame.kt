@@ -56,12 +56,10 @@ class HigherLowerGame(
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
-        val scope = rememberCoroutineScope()
-
         // Access the view model and get the 2 random levels
         val viewModel = viewModel<DemonListViewModel>()
-        val levels = listOf<Level>(
-            viewModel.GetRandomLevel(), viewModel.GetRandomLevel()
+        val levels = listOf<Level?>(
+            viewModel.getRandomLevel(), viewModel.getRandomLevel()
         )
 
         var knownLevel by rememberSaveable() {
@@ -72,11 +70,26 @@ class HigherLowerGame(
             mutableStateOf(value = levels[1])
         }
 
-        val knownPos = knownLevel.position
-        val unknownPos = unknownLevel.position
+        // Need val versions of the known and unknown levels to allow for smart-casting
+        val currentKnownLevel = knownLevel
+        val currentUnknownLevel = unknownLevel
+
+        if (currentKnownLevel == null || currentUnknownLevel == null) {
+            RenderMessage(
+                text = "Loading levels...",
+                modifier = Modifier.fillMaxWidth()
+            )
+            return
+        }
+
+        val knownPos = currentKnownLevel.position
+        val unknownPos = currentUnknownLevel.position
 
         if (knownPos == null || unknownPos == null) {
-            RenderMessage(text = "Game failed to load.")
+            RenderMessage(
+                text = "Game failed to load",
+                modifier = Modifier.fillMaxWidth()
+            )
             return
         }
 
@@ -125,12 +138,12 @@ class HigherLowerGame(
                 }
 
                 //Known Region
-                KnownRegion(boxModifier, knownLevel, knownPos)
+                KnownRegion(boxModifier, currentKnownLevel, knownPos)
 
                 //Unknown Region
                 UnknownRegion(
                     boxModifier,
-                    unknownLevel, uiUnknownPos,
+                    currentUnknownLevel, uiUnknownPos,
                     onClick = {
                         shouldShowPanel = true
                     }
@@ -151,7 +164,7 @@ class HigherLowerGame(
 
                             // Go next round
                             knownLevel = unknownLevel
-                            unknownLevel = viewModel.GetRandomLevel()
+                            unknownLevel = viewModel.getRandomLevel()
 
                             // Increase streak
                             ++streak

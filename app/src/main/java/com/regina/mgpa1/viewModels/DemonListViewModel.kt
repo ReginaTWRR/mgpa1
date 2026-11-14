@@ -21,8 +21,8 @@ class DemonListViewModel : ViewModel() {
         LoadLevelList()
     }
 
-    fun GetRandomLevel(): Level {
-        return _levelList.value.random()
+    fun getRandomLevel(): Level? {
+        return _levelList.value.randomOrNull()
     }
 
     private fun LoadLevelList() {

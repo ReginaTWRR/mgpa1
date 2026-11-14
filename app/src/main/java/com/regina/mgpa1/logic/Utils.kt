@@ -8,13 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+//==INTERFACES
+interface Searchable {
+    fun doesMatchSearchQuery(query: String) : Boolean
+}
+
 //==FUNCTIONS
 
 //A Composable function to render a level's name and position
 @Composable
-fun RenderLevelName(
-    level: Level,
-    modifier: Modifier
+fun LevelName(level: Level, modifier: Modifier
 ) {
     Text(
         text = "#${level.position} - ${level.name}",
@@ -24,10 +27,10 @@ fun RenderLevelName(
 
 //A Composable function to show the user a message
 @Composable
-fun RenderMessage(text: String) {
+fun RenderMessage(text: String, modifier: Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
         Text(
             text = text,

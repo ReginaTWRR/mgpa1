@@ -44,7 +44,24 @@ data class Level(
     val gddl_tier: Float ?= null,
     val nlw_tier: String ?= null,
     val completed_by_user: Boolean ?= null
-) : Parcelable
+) : Parcelable, Searchable {
+    override fun doesMatchSearchQuery(query: String): Boolean {
+        // Check if the query is blank
+        if (query.isBlank()) return false
+
+        // List of what the user could be searching for
+        val matchingCombinations = listOf(
+            name,
+            "$position",
+            id
+        )
+
+        return matchingCombinations.any {
+            it.contains(other = query, ignoreCase = true)
+        }
+    }
+
+}
 
 //Aredl Get Level Details
 @Serializable

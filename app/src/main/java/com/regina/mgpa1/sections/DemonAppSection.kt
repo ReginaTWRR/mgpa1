@@ -26,10 +26,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.logic.BuildYTWebImage
 import com.regina.mgpa1.logic.GetLevelDetails
-import com.regina.mgpa1.logic.GetLevelList
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
-import com.regina.mgpa1.logic.RenderLevelName
+import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
@@ -145,7 +144,7 @@ fun LevelCard(level: Level) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RenderLevelName(level, modifier = Modifier)
+            LevelName(level, modifier = Modifier)
             Spacer(modifier = Modifier.width(10.dp))
 
             Column() {

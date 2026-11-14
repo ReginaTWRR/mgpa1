@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -20,21 +22,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.R
-import com.regina.mgpa1.logic.RenderLevelName
+import com.regina.mgpa1.logic.Level
+import com.regina.mgpa1.logic.LevelName
+import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
+import com.regina.mgpa1.viewModels.DemonSearchViewModel
 
 //==CLASSES
 
@@ -42,7 +45,19 @@ import com.regina.mgpa1.viewModels.DemonListViewModel
 class HomeAppSection : AppSection(header = "Home") {
     @Composable
     override fun SectionLayout() {
-        val scope = rememberCoroutineScope()
+        // Here, access the DemonListViewModel and pass it into the DemonSearchViewModel
+        // using the custom factory function that we have defined in
+        // the DemonSearchViewModel. This helps the app to not crash.
+        val listViewModel = viewModel<DemonListViewModel>()
+        val searchViewModel = viewModel<DemonSearchViewModel>(
+            factory = DemonSearchViewModel.factory(
+                listViewModel = listViewModel
+            )
+        )
+
+        val searchText = searchViewModel.searchText.collectAsState().value
+        val isSearching = searchViewModel.isSearching.collectAsState().value
+        val levelList = searchViewModel.levelList.collectAsState(initial = emptyList()).value
 
         // Biggest rendering body
         Box(
@@ -67,11 +82,21 @@ class HomeAppSection : AppSection(header = "Home") {
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                SearchBar()
-                Spacer(modifier = Modifier.height(10.dp))
-                DemonOfTheDay()
-                Spacer(modifier = Modifier.height(10.dp))
-                DailyChallenge()
+                SearchBar(searchViewModel, searchText)
+
+                if (isSearching) {
+                    SearchBarResults(
+                        levelList = levelList,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    DemonOfTheDay()
+                    Spacer(modifier = Modifier.height(10.dp))
+                    DailyChallenge()
+                }
             }
         }
     }
@@ -81,11 +106,7 @@ class HomeAppSection : AppSection(header = "Home") {
 
 //A Composable function that renders the search bar
 @Composable
-fun SearchBar() {
-    var text by rememberSaveable {
-        mutableStateOf(value = "")
-    }
-
+fun SearchBar(viewModel: DemonSearchViewModel, searchText: String) {
     Row (
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -105,10 +126,8 @@ fun SearchBar() {
         )
 
         TextField(
-            value = text,
-            onValueChange = {
-                text = it
-            },
+            value = searchText,
+            onValueChange = viewModel::onSearchTextChanged,
             placeholder = {
               Text(text = "Search for a demon...")
             },
@@ -126,12 +145,36 @@ fun SearchBar() {
     }
 }
 
+//A Composable function that renders the search bar results
+@Composable
+fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
+    LazyColumn(
+        modifier = modifier
+    ) {
+        items(levelList) { level ->
+            LevelName(
+                level = level,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
 //A Composable function that renders the demon of the day
 @Composable
 fun DemonOfTheDay() {
     // Access the view model and get a random demon
     val viewModel = viewModel<DemonListViewModel>()
-    val demon = viewModel.GetRandomLevel()
+    val demon = viewModel.getRandomLevel()
+
+    if (demon == null)
+    {
+        RenderMessage(
+            text = "Loading demon...",
+            modifier = Modifier.fillMaxWidth()
+        )
+        return
+    }
 
     Column (
         horizontalAlignment = Alignment.Start,
@@ -156,7 +199,7 @@ fun DemonOfTheDay() {
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            RenderLevelName(
+            LevelName(
                 level = demon,
                 modifier = Modifier.weight(1f)
             )
