@@ -1,6 +1,8 @@
 package com.regina.mgpa1.sections
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,10 +27,15 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +50,8 @@ import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 //==CLASSES
 
@@ -66,8 +75,27 @@ class HomeAppSection(
         val isSearching = searchViewModel.isSearching.collectAsState().value
         val levelList by searchViewModel.levelList.collectAsState(initial = emptyList())
 
+        var backPressed by remember { mutableStateOf(value = false) }
+
+        //Create a thread to reset the backpressed after 2s
+        LaunchedEffect(backPressed) {
+            if(backPressed){
+                delay(2000.milliseconds)
+                backPressed = false
+            }
+        }
+        //Grab the local context
+        val context = LocalContext.current
+        val currActivity = LocalActivity.current
+
         BackHandler() {
-            println("bye")
+            if(backPressed){
+                currActivity?.finish()
+            }
+            else{
+                backPressed = true
+                Toast.makeText(context,"Tap again to exit", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Biggest rendering body
