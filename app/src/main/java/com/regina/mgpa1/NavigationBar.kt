@@ -1,5 +1,6 @@
 package com.regina.mgpa1
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -72,6 +73,12 @@ fun NavigationBar(){
     )
     val scope = rememberCoroutineScope()
 
+    //Handle Backward navigation gestures || Note: might have issues because we dont do any priority handling
+    BackHandler() {
+        scope.launch {
+            pagerState.animateScrollToPage(0)
+        }
+    }
 
     //Use this as the main UI Holder
     Scaffold(

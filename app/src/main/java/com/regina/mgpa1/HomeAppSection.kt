@@ -1,5 +1,6 @@
 package com.regina.mgpa1
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +40,9 @@ class HomeAppSection : AppSection(header = "Home") {
     @Composable
     override fun SectionLayout() {
         val scope = rememberCoroutineScope()
-
+        BackHandler() {
+            println("bye")
+        }
         // Biggest rendering body
         Box(
             contentAlignment = Alignment.Center,
