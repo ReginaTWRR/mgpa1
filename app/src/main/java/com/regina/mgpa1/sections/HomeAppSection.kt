@@ -1,5 +1,6 @@
 package com.regina.mgpa1.sections
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,10 @@ class HomeAppSection(
         val searchText = searchViewModel.searchText.collectAsState().value
         val isSearching = searchViewModel.isSearching.collectAsState().value
         val levelList by searchViewModel.levelList.collectAsState(initial = emptyList())
+
+        BackHandler() {
+            println("bye")
+        }
 
         // Biggest rendering body
         Box(
