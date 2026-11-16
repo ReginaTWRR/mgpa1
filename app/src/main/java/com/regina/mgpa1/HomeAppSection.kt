@@ -1,6 +1,8 @@
 package com.regina.mgpa1
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,17 +23,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 //==CLASSES
 
@@ -40,8 +47,27 @@ class HomeAppSection : AppSection(header = "Home") {
     @Composable
     override fun SectionLayout() {
         val scope = rememberCoroutineScope()
+        var backPressed by remember { mutableStateOf(false) }
+
+        //Create a thread to reset the backpressed after 2s
+        LaunchedEffect(backPressed) {
+            if(backPressed){
+                delay(2000.milliseconds)
+                backPressed = false
+            }
+        }
+        //Grab the local context
+        val context = LocalContext.current
+        val currActivity = LocalActivity.current
+
         BackHandler() {
-            println("bye")
+            if(backPressed){
+                currActivity?.finish()
+            }
+            else{
+                backPressed = true
+                Toast.makeText(context,"Tap again to exit", Toast.LENGTH_SHORT).show()
+            }
         }
         // Biggest rendering body
         Box(
