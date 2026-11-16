@@ -1,5 +1,6 @@
 package com.regina.mgpa1.games
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,13 +48,16 @@ import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.RenderMessage
+import com.regina.mgpa1.sections.NavDestination
 import com.regina.mgpa1.viewModels.DemonListViewModel
+import kotlinx.coroutines.launch
 
 //==CLASSES
 
 //A class that implements the Higher Lower game
 class HigherLowerGame(
-    val onGameOver: (hasWon: Boolean) -> Unit
+    val onGameOver: (hasWon: Boolean) -> Unit,
+    val returnOverviewPage: () -> Unit
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
@@ -106,6 +110,11 @@ class HigherLowerGame(
 
         var shouldShowPanel by remember {
             mutableStateOf(value = false)
+        }
+
+        BackHandler() {
+            // Go back to the Games section
+            returnOverviewPage()
         }
 
         // Used to overlay the ChoiceButtons over everything else
