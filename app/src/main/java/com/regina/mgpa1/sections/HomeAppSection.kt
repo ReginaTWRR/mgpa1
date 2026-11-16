@@ -45,7 +45,6 @@ import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelName
-import com.regina.mgpa1.logic.NavDestination
 import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel

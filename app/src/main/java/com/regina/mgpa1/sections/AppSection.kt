@@ -1,7 +1,6 @@
 package com.regina.mgpa1.sections
 
 import androidx.compose.runtime.Composable
-import com.regina.mgpa1.logic.NavDestination
 
 //==INTERFACES
 

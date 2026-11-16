@@ -1,5 +1,6 @@
-package com.regina.mgpa1.logic
+package com.regina.mgpa1.sections
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,11 +18,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.regina.mgpa1.R
-import com.regina.mgpa1.sections.AppSection
-import com.regina.mgpa1.sections.DemonAppSection
-import com.regina.mgpa1.sections.GamesAppSection
-import com.regina.mgpa1.sections.HomeAppSection
-import com.regina.mgpa1.sections.LoginAppSection
 import kotlinx.coroutines.launch
 
 //==CLASSES
@@ -112,6 +108,13 @@ class SectionNavigation {
                 section = LoginAppSection()
             )
         )
+
+        //Handle Backward navigation gestures || Note: might have issues because we dont do any priority handling
+        BackHandler() {
+            scope.launch {
+                pagerState.animateScrollToPage(0)
+            }
+        }
 
         //Use this as the main UI Holder
         Scaffold(
