@@ -19,9 +19,10 @@ class DemonSearchViewModel(
     private val _searchText = MutableStateFlow(value = "")
     val searchText = _searchText.asStateFlow()
 
-    // Boolean flag to indicate whether the user is typing in the search bar
-    private val _isSearching = MutableStateFlow(value = false)
-    val isSearching = _isSearching.asStateFlow()
+    // Boolean flag to indicate whether the keyboard is active. For now, use it to track
+    // whether the user is searching
+    private val _isKeyboardActive = MutableStateFlow(value = false)
+    val isKeyboardActive = _isKeyboardActive.asStateFlow()
 
     // Access the view model and get the level list
     private val _levelList = listViewModel.levelList
@@ -44,7 +45,11 @@ class DemonSearchViewModel(
     // Function to be called when the search text changes
     fun onSearchTextChanged(newText: String) {
         _searchText.value = newText
-        _isSearching.value = newText.isNotBlank()
+    }
+
+    // Function to be called when the keyboard's activity changes
+    fun onKeyboardActivityChanged(isKeyboardActive: Boolean) {
+        _isKeyboardActive.value = isKeyboardActive
     }
 
     // Define ViewModel factory

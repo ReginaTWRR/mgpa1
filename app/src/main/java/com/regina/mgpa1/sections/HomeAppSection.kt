@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,11 +33,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,6 +53,7 @@ import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel
+import com.regina.mgpa1.viewModels.HomePageViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -69,11 +75,17 @@ class HomeAppSection(
                 listViewModel = listViewModel
             )
         )
+        val homeViewModel = viewModel<HomePageViewModel>(
+            factory = HomePageViewModel.factory(
+                listViewModel = listViewModel
+            )
+        )
 
         val searchText = searchViewModel.searchText.collectAsState().value
-        val isSearching = searchViewModel.isSearching.collectAsState().value
+        val isKeyboardActive = searchViewModel.isKeyboardActive.collectAsState().value
         val levelList by searchViewModel.levelList.collectAsState(initial = emptyList())
 
+        // BackHandler
         var backPressed by remember { mutableStateOf(value = false) }
 
         //Create a thread to reset the backpressed after 2s
@@ -122,7 +134,7 @@ class HomeAppSection(
                 Spacer(modifier = Modifier.height(10.dp))
                 SearchBar(searchViewModel, searchText)
 
-                if (isSearching) {
+                if (isKeyboardActive) {
                     SearchBarResults(
                         levelList = levelList,
                         modifier = Modifier
@@ -131,7 +143,7 @@ class HomeAppSection(
                     )
                 } else {
                     Spacer(modifier = Modifier.height(10.dp))
-                    RandomDemon(listViewModel)
+                    RandomDemon(homeViewModel)
                     Spacer(modifier = Modifier.height(10.dp))
                     DailyChallenge(requestSectionChange)
                 }
@@ -145,6 +157,29 @@ class HomeAppSection(
 //A Composable function that renders the search bar
 @Composable
 fun SearchBar(viewModel: DemonSearchViewModel, searchText: String) {
+    // To unfocus the text field when the keyboard is down
+    val focusManager = LocalFocusManager.current
+
+    // Can only be called in the context of a Composable
+    val isKeyboardActive = WindowInsets.ime.getBottom(density = LocalDensity.current) > 0
+    var wasKeyboardActive by rememberSaveable() {
+        mutableStateOf(value = false)
+    }
+
+    // This block executes when isKeyboardActive changes
+    LaunchedEffect(key1 = isKeyboardActive) {
+        // Update the viewModel's boolean
+        viewModel.onKeyboardActivityChanged(isKeyboardActive)
+
+        // Check if the user stopped searching. If so, clear focus
+        if (!isKeyboardActive && wasKeyboardActive) {
+            focusManager.clearFocus()
+        }
+
+        // Update wasSearching
+        wasKeyboardActive = isKeyboardActive
+    }
+
     Row (
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -200,17 +235,16 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 
 //A Composable function that renders a random demon
 @Composable
-fun RandomDemon(listViewModel: DemonListViewModel) {
+fun RandomDemon(homeViewModel: HomePageViewModel) {
     val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
 
-    // Access the view model and get a random demon
+    // Access the view model and get the generated demon
     // Need to collect the level list as a state so that this recomposes when the list
     // is done loading in DemonListViewModel. Else, UI will not be updated when the list
     // actually loads.
-    val demonList by listViewModel.levelList.collectAsState()
-    val demon = demonList.randomOrNull()
-
-    val uriHandler = LocalUriHandler.current
+    val generatedDemon by homeViewModel.generatedDemon.collectAsState()
+    val demon = generatedDemon
 
     if (demon == null)
     {
