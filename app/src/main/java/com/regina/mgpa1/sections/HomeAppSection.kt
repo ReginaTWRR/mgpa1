@@ -37,8 +37,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -55,6 +53,7 @@ import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel
+import com.regina.mgpa1.viewModels.HomePageViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -73,6 +72,11 @@ class HomeAppSection(
         val listViewModel = viewModel<DemonListViewModel>()
         val searchViewModel = viewModel<DemonSearchViewModel>(
             factory = DemonSearchViewModel.factory(
+                listViewModel = listViewModel
+            )
+        )
+        val homeViewModel = viewModel<HomePageViewModel>(
+            factory = HomePageViewModel.factory(
                 listViewModel = listViewModel
             )
         )
@@ -139,7 +143,7 @@ class HomeAppSection(
                     )
                 } else {
                     Spacer(modifier = Modifier.height(10.dp))
-                    RandomDemon(listViewModel)
+                    RandomDemon(homeViewModel)
                     Spacer(modifier = Modifier.height(10.dp))
                     DailyChallenge(requestSectionChange)
                 }
@@ -231,17 +235,16 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 
 //A Composable function that renders a random demon
 @Composable
-fun RandomDemon(listViewModel: DemonListViewModel) {
+fun RandomDemon(homeViewModel: HomePageViewModel) {
     val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
 
-    // Access the view model and get a random demon
+    // Access the view model and get the generated demon
     // Need to collect the level list as a state so that this recomposes when the list
     // is done loading in DemonListViewModel. Else, UI will not be updated when the list
     // actually loads.
-    val demonList by listViewModel.levelList.collectAsState()
-    val demon = demonList.randomOrNull()
-
-    val uriHandler = LocalUriHandler.current
+    val generatedDemon by homeViewModel.generatedDemon.collectAsState()
+    val demon = generatedDemon
 
     if (demon == null)
     {
