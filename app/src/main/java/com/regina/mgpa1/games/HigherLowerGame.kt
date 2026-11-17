@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 
 //A class that implements the Higher Lower game
 class HigherLowerGame(
-    val onGameOver: (hasWon: Boolean) -> Unit,
+    val onGameExit: () -> Unit,
     val returnOverviewPage: () -> Unit
 ) : AppSection(header = "Higher/Lower") {
     @Composable
@@ -188,7 +188,7 @@ class HigherLowerGame(
                             streak = 0
 
                             // Go back to the overview page
-                            onGameOver(false)
+                            onGameExit()
                         }
 
                         shouldShowPanel = false

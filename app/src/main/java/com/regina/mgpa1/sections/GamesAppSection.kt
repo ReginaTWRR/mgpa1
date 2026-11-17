@@ -27,7 +27,8 @@ import com.regina.mgpa1.games.HigherLowerGame
 
 //A class that implements the Games section of the App. Designed with the
 //consideration of adding more games in the future, though there is currently only one.
-class GamesAppSection() : AppSection(header = "Games") {
+class GamesAppSection : AppSection(header = "Games") {
+    @Preview
     @Composable
     override fun SectionLayout() {
         // Need to declare currentPage before defining the overviewPage because of
@@ -36,7 +37,7 @@ class GamesAppSection() : AppSection(header = "Games") {
             mutableStateOf<GamesPage?>(value = null)
         }
 
-        // Same; need to declare overviewPage first, dependency in higher lower game.
+        // Same, need to declare overviewPage first, dependency in higher lower game.
         var overviewPage by remember {
             mutableStateOf<GamesPage?>(value = null)
         }
@@ -56,7 +57,7 @@ class GamesAppSection() : AppSection(header = "Games") {
                         code = PageCode.HIGHERLOWER,
                         content = {
                             GameHigherLower(
-                                onGameOver = {
+                                onGameExit = {
                                     currentPage = overviewPage
                                 },
                                 returnOverviewPage = returnOverviewPage
@@ -161,10 +162,10 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
 //A Composable function that renders the higher lower game
 @Composable
 fun GameHigherLower(
-    onGameOver: (hasWon: Boolean) -> Unit,
+    onGameExit: () -> Unit,
     returnOverviewPage: () -> Unit
 ) {
-    HigherLowerGame(onGameOver, returnOverviewPage).SectionLayout()
+    HigherLowerGame(onGameExit, returnOverviewPage).SectionLayout()
 }
 
 //A Composable function that defines a game card's appearance and function
