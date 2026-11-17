@@ -52,7 +52,7 @@ import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //A class that implements the Higher Lower game
 class HigherLowerGame(
-    val onGameOver: (hasWon: Boolean) -> Unit
+    val onGameExit: () -> Unit
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
@@ -179,7 +179,7 @@ class HigherLowerGame(
                             streak = 0
 
                             // Go back to the overview page
-                            onGameOver(false)
+                            onGameExit()
                         }
 
                         shouldShowPanel = false

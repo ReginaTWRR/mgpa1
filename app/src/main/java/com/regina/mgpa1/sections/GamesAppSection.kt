@@ -52,7 +52,7 @@ class GamesAppSection : AppSection(header = "Games") {
                         code = PageCode.HIGHERLOWER,
                         content = {
                             GameHigherLower(
-                                onGameOver = {
+                                onGameExit = {
                                     currentPage = overviewPage
                                 }
                             )
@@ -155,8 +155,8 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
 
 //A Composable function that renders the higher lower game
 @Composable
-fun GameHigherLower(onGameOver: (hasWon: Boolean) -> Unit) {
-    HigherLowerGame(onGameOver).SectionLayout()
+fun GameHigherLower(onGameExit: () -> Unit) {
+    HigherLowerGame(onGameExit).SectionLayout()
 }
 
 //A Composable function that defines a game card's appearance and function
