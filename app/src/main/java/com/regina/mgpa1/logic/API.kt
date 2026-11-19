@@ -3,6 +3,9 @@ package com.regina.mgpa1.logic
 import androidx.compose.runtime.Composable
 import com.regina.mgpa1.ErrorUIs.E400UI
 import com.regina.mgpa1.ErrorUIs.E404UI
+import com.regina.mgpa1.ErrorUIs.E408UI
+import com.regina.mgpa1.ErrorUIs.E410UI
+import com.regina.mgpa1.ErrorUIs.E511UI
 import com.regina.mgpa1.ErrorUIs.EDefaulUI
 import com.regina.mgpa1.ErrorUIs.ErrorUIBase
 import java.io.IOException
@@ -83,9 +86,19 @@ suspend fun GetLevelList():List<Level>{
 }
 
 suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
-//  val scope = CoroutineScope(Dispatchers.IO)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels/$LevelID")}
-    val results = Json.decodeFromString<LevelDetails>(response.content)
+    val results : LevelDetails;
+
+    if(response.responseCode in 200..300){
+        results = Json.decodeFromString<LevelDetails>(response.content)
+    }
+    else{
+        //Position is response code
+        //Name is response content
+        results = LevelDetails("-1",response.content,response.responseCode,0, STATUS.Removed,false,0,false,listOf(null),null,null,null,false,null,null,
+            User("Error","Error","Error"),listOf())
+    }
+
     return results
 }
 
@@ -134,10 +147,23 @@ fun GetLevelThumbnail(LevelID : Int) : String{
 fun ErrorHandler(ErrorLevel:Level){
     val ErrorCode = ErrorLevel.position
     val ErrorMessage = ErrorLevel.publisher_id
+    errorCase(ErrorCode,ErrorMessage)
+}
+//Overload to use details instead
+@Composable
+fun ErrorHandler(ErrorDetails: LevelDetails){
+    errorCase(ErrorDetails.position,ErrorDetails.name)
+}
+
+@Composable
+private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
     //Switch case
     when(ErrorCode){
         400-> E400UI().ErrorLayout(ErrorCode,ErrorMessage)
         404-> E404UI().ErrorLayout(ErrorCode,ErrorMessage)
+        408-> E408UI().ErrorLayout(ErrorCode,ErrorMessage)
+        410-> E410UI().ErrorLayout(ErrorCode,ErrorMessage)
+        511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
         else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }
 }

@@ -51,6 +51,7 @@ import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
+import com.regina.mgpa1.logic.LevelDetails
 import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
@@ -58,6 +59,7 @@ import com.regina.mgpa1.viewModels.DemonSearchViewModel
 import com.regina.mgpa1.viewModels.HomePageViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.milliseconds
 
 //==CLASSES
@@ -72,6 +74,18 @@ class HomeAppSection(
         // using the custom factory function that we have defined in
         // the DemonSearchViewModel. This helps the app to not crash.
         val listViewModel = viewModel<DemonListViewModel>()
+
+        //For lack of a better fix, this ensures that the search viewmodel and hompageview modek
+        //Doesnt get inititalised until the list is properly found
+        val ChecklevelList by listViewModel.levelList.collectAsState()
+        if(ChecklevelList.isEmpty())
+            return
+        val ErrorLevel = ChecklevelList[0]
+        if(ErrorLevel.id.equals("-1")){
+            ErrorHandler(ErrorLevel)
+            return
+        }
+
         val searchViewModel = viewModel<DemonSearchViewModel>(
             factory = DemonSearchViewModel.factory(
                 listViewModel = listViewModel
@@ -238,15 +252,6 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 //A Composable function that renders a random demon
 @Composable
 fun RandomDemon(homeViewModel: HomePageViewModel) {
-    val DLviewModel = viewModel<DemonListViewModel>()
-    val levelList by DLviewModel.levelList.collectAsState()
-    if(levelList.isEmpty())
-        return
-    val ErrorLevel = levelList[0]
-    if(ErrorLevel.id.equals("-1")){
-        ErrorHandler(ErrorLevel)
-        return
-    }
 
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
@@ -257,15 +262,27 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
     // actually loads.
     val generatedDemon by homeViewModel.generatedDemon.collectAsState()
     val demon = generatedDemon
+    val LevelDetails: LevelDetails
 
-    if (demon == null)
-    {
+
+    if (demon == null) {
         RenderMessage(
             text = "Loading demon...",
             modifier = Modifier.fillMaxWidth()
         )
         return
     }
+    //Place this here to ensure demon != null
+    runBlocking {
+        LevelDetails = GetLevelDetails(demon.level_id)
+    }
+
+    //Response code check for levelDetails
+    if(LevelDetails.id == "-1"){
+        ErrorHandler(LevelDetails)
+        return;
+    }
+
 
     Column (
         horizontalAlignment = Alignment.Start,
@@ -278,7 +295,8 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
         Spacer(modifier = Modifier.height(10.dp))
         AsyncImage(
             model = GetLevelThumbnail(LevelID = demon.level_id),
-            contentDescription = "${demon.name} thumbnail"
+            contentDescription = "${demon.name} thumbnail",
+            error = painterResource(android.R.drawable.ic_dialog_alert)
         )
         Spacer(modifier = Modifier.height(10.dp))
 

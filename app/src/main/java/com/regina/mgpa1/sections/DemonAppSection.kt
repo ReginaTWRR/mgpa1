@@ -133,8 +133,13 @@ fun LevelCard(level: Level) {
             null
         }
     }.value
-
+    //Response code check for levelDetails
+    if(levelDetails?.id == "-1"){
+        ErrorHandler(levelDetails)
+        return;
+    }
     Column() {
+        //This might break if theres no verification. Be carefull.
         // Apparently, one level can be verified multiple times. For the purpose of
         // this UI, we will just use the first one.
         val videoURL = levelDetails?.verifications[0]?.video_url

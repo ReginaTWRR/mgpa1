@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -61,6 +63,10 @@ class HigherLowerGame(
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
+        BackHandler() {
+            // Go back to the Games section
+            returnOverviewPage()
+        }
         // Access the view model and get the 2 random levels
         val viewModel = viewModel<DemonListViewModel>()
 
@@ -69,7 +75,11 @@ class HigherLowerGame(
             return
         val ErrorLevel = levelList[0]
         if(ErrorLevel.id.equals("-1")){
-            ErrorHandler(ErrorLevel)
+            //Center both button and Error UI.
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                ErrorHandler(ErrorLevel)
+                Button(onClick = returnOverviewPage) { Text("return to Games Page") }
+            }
             return
         }
 
@@ -120,10 +130,6 @@ class HigherLowerGame(
             mutableStateOf(value = false)
         }
 
-        BackHandler() {
-            // Go back to the Games section
-            returnOverviewPage()
-        }
 
         // Used to overlay the ChoiceButtons over everything else
         Box(
@@ -222,7 +228,7 @@ fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        // Loading the background image
+        // Loading the background image - Shld place error images here
         AsyncImage(
             model = GetLevelThumbnail(LevelID = knownLevel.level_id),
             contentDescription = "Thumbnail",
