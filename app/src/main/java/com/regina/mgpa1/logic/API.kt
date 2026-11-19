@@ -7,7 +7,8 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 
 //==Default Variables
-val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+//val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+val aredlEndPoint = "https://glph1w.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //This is a data class meant for this file.
 data class APIResponse(
@@ -61,15 +62,23 @@ suspend fun getfromAPI(inputString : String): APIResponse{
 //==JSON Parsers
 
 suspend fun GetLevelList():List<Level>{
-//    val scope = CoroutineScope(Dispatchers.Default)
+//   val scope = CoroutineScope(Dispatchers.Default)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels")}
-    val results = Json.decodeFromString<List<Level>>(response.content)
+    var results:List<Level>
+
+    if(response.responseCode in 200..300){
+        results =  Json.decodeFromString<List<Level>>(response.content)
+    }
+    else{
+        val errorLevel = Level("-1","Error",response.responseCode,response.content,0, STATUS.Removed,false,0,false,listOf(null),null,null,null,false,null,null,null)
+        results = listOf(errorLevel)
+    }
 
     return results
 }
 
 suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
-//    val scope = CoroutineScope(Dispatchers.IO)
+//  val scope = CoroutineScope(Dispatchers.IO)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels/$LevelID")}
     val results = Json.decodeFromString<LevelDetails>(response.content)
     return results
