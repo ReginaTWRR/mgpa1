@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.logic.BuildYTWebImage
+import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
@@ -41,6 +42,13 @@ class DemonAppSection : AppSection(header = "Demon List") {
         // Access the view model and get the level list
         val viewModel = viewModel<DemonListViewModel>()
         val levelList by viewModel.levelList.collectAsState()
+        if(levelList.isEmpty())
+            return
+        val ErrorLevel = levelList[0]
+        if(ErrorLevel.id.equals("-1")){
+            ErrorHandler(ErrorLevel)
+            return
+        }
 
         // Biggest rendering body
         Column(

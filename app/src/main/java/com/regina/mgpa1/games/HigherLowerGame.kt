@@ -46,6 +46,7 @@ import com.regina.mgpa1.sections.AppSection
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.R
+import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.sections.NavDestination
 import com.regina.mgpa1.viewModels.DemonListViewModel
@@ -64,6 +65,14 @@ class HigherLowerGame(
         val viewModel = viewModel<DemonListViewModel>()
 
         val levelList by viewModel.levelList.collectAsState()
+        if(levelList.isEmpty())
+            return
+        val ErrorLevel = levelList[0]
+        if(ErrorLevel.id.equals("-1")){
+            ErrorHandler(ErrorLevel)
+            return
+        }
+
         val levels = listOf<Level?>(
             levelList.randomOrNull(), levelList.randomOrNull()
         )

@@ -2,6 +2,8 @@ package com.regina.mgpa1.logic
 
 import androidx.compose.runtime.Composable
 import com.regina.mgpa1.ErrorUIs.E400UI
+import com.regina.mgpa1.ErrorUIs.E404UI
+import com.regina.mgpa1.ErrorUIs.EDefaulUI
 import com.regina.mgpa1.ErrorUIs.ErrorUIBase
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -135,5 +137,7 @@ fun ErrorHandler(ErrorLevel:Level){
     //Switch case
     when(ErrorCode){
         400-> E400UI().ErrorLayout(ErrorCode,ErrorMessage)
+        404-> E404UI().ErrorLayout(ErrorCode,ErrorMessage)
+        else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }
 }

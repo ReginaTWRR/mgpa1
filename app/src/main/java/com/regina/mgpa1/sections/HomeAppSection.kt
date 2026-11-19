@@ -240,9 +240,8 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 fun RandomDemon(homeViewModel: HomePageViewModel) {
     val DLviewModel = viewModel<DemonListViewModel>()
     val levelList by DLviewModel.levelList.collectAsState()
-    if(levelList.count() <= 0)
+    if(levelList.isEmpty())
         return
-
     val ErrorLevel = levelList[0]
     if(ErrorLevel.id.equals("-1")){
         ErrorHandler(ErrorLevel)
