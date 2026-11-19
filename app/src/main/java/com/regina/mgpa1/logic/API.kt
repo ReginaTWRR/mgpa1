@@ -1,5 +1,8 @@
 package com.regina.mgpa1.logic
 
+import androidx.compose.runtime.Composable
+import com.regina.mgpa1.ErrorUIs.E400UI
+import com.regina.mgpa1.ErrorUIs.ErrorUIBase
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -124,3 +127,13 @@ fun GetLevelThumbnail(LevelID : Int) : String{
     return "https://raw.githubusercontent.com/All-Rated-Extreme-Demon-List/Thumbnails/main/levels/full/$LevelID.webp"
 }
 
+//This function finds out which error code is what and calls the appropriate UI
+@Composable
+fun ErrorHandler(ErrorLevel:Level){
+    val ErrorCode = ErrorLevel.position
+    val ErrorMessage = ErrorLevel.publisher_id
+    //Switch case
+    when(ErrorCode){
+        400-> E400UI().ErrorLayout(ErrorCode,ErrorMessage)
+    }
+}

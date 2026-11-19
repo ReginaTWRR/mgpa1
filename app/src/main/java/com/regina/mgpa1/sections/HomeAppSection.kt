@@ -45,8 +45,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.ErrorUIs.E400UI
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.R
+import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelName
@@ -236,6 +238,16 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 //A Composable function that renders a random demon
 @Composable
 fun RandomDemon(homeViewModel: HomePageViewModel) {
+    val DLviewModel = viewModel<DemonListViewModel>()
+    val levelList by DLviewModel.levelList.collectAsState()
+    if(levelList.count() <= 0)
+        return
+
+    val ErrorLevel = levelList[0]
+    if(ErrorLevel.id.equals("-1")){
+        ErrorHandler(ErrorLevel)
+        return
+    }
 
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
