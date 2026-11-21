@@ -1,5 +1,6 @@
 package com.regina.mgpa1.sections
 
+import android.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +42,7 @@ import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
 import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.viewModels.DemonListViewModel
+import kotlin.math.exp
 
 //==CLASSES
 
@@ -103,12 +106,18 @@ class DemonAppSection : AppSection(header = "Demon List") {
     }
 }
 //This is for checking if the demonList was loaded or not so that we can know when to expand the first card
-//var initialised by mutableStateOf(false)
+var initialised by mutableStateOf(false)
 //==FUNCTIONS
 
 //A Composable function that renders all levels in the passed list
 @Composable
 fun RenderLevelList(levels: List<Level>) {
+    var hi by rememberSaveable{mutableStateOf(false)}
+    println("adsdgfdlfjgbh $hi")
+    if(!hi){
+        hi = true;
+        println("hi")
+    }
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -127,20 +136,34 @@ fun RenderLevelList(levels: List<Level>) {
             items = levels,
             key = { level -> level.id }
         ) { level ->
-            LevelCard(level)
+            if(level.position == 1){
+                if(!initialised){
+                    initialised = true;
+                    println("WE CAN OVERCOME THEIR POWER~~~")
+                   level.expanded = true
+                }
+            }
+            LevelCard(level, onClick = {
+                expanded->
+                level.expanded = expanded
+            })
         }
     }
 }
 
 //A Composable function that defines how we show the level details
 @Composable
-fun LevelCard(level: Level) {
+fun LevelCard(level: Level,Expanded: Boolean = false,onClick:(expanded:Boolean)->Unit) {
     //Card Variables
-    var expanded by remember{ mutableStateOf(false) }
-//    if(!initialised){
-//        initialised = true;
-//        if(level.position == 1){
-//            expanded = true
+    //This forcefully triggers recomposition. when the card is loaded, it gets updated to the accurate state.
+    var expanded by remember{ mutableStateOf(level.expanded) }
+//    val expanded = level.expanded;
+//    if(level.position == 1){
+//        println("1 $initialised")
+//        if(!initialised){
+//            initialised = true;
+//            println("2 $initialised")
+////            expanded = true;
 //        }
 //    }
 
@@ -150,7 +173,8 @@ fun LevelCard(level: Level) {
     val fakePaddingModifiers = Modifier.height(16.dp).fillMaxWidth().then(headerBackground)
     Card(modifier =  Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxWidth().clickable{expanded = !expanded}.then(headerBackground),
+//            modifier = Modifier.fillMaxWidth().clickable{expanded = !expanded}.then(headerBackground),
+            modifier = Modifier.fillMaxWidth().clickable{onClick(!level.expanded);expanded = !expanded}.then(headerBackground),
             horizontalAlignment = Alignment.CenterHorizontally){
             Spacer(modifier = fakePaddingModifiers)
             //Render Level Name

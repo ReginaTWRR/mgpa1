@@ -43,7 +43,8 @@ data class Level(
     val is_edel_pending : Boolean,
     val gddl_tier: Float ?= null,
     val nlw_tier: String ?= null,
-    val completed_by_user: Boolean ?= null
+    val completed_by_user: Boolean ?= null,
+    var expanded: Boolean = false
 ) : Parcelable, Searchable {
     override fun doesMatchSearchQuery(query: String): Boolean {
         // Check if the query is blank
