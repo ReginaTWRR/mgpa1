@@ -8,8 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 //==INTERFACES
@@ -21,6 +20,8 @@ interface ErrorUIInterface{
 }
 
 abstract class ErrorUIBase: ErrorUIInterface{
+    val contactMessage = "Please contact us! @CustomerSupport"
+
     //This class calls the UI and auto places the appropriate UI
     @Composable
     fun ErrorLayout( responseCode:Int?, responseMessage:String){
@@ -28,9 +29,9 @@ abstract class ErrorUIBase: ErrorUIInterface{
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Text(text = "Response Code: $responseCode")
+            Text(text = "Response Code: $responseCode", textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Response Message:$responseMessage")
+            Text(text = "Response Message: $responseMessage", textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(12.dp))
             ErrorResolution()
         }

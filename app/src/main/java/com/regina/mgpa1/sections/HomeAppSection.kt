@@ -45,7 +45,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.regina.mgpa1.ErrorUIs.E400UI
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.ErrorHandler

@@ -24,8 +24,18 @@ class E408UI: ErrorUIBase() {
     override fun ErrorResolution() {
 //        Text("Hello! the AREDL might be down right now. It might also be an issue on our end. Please Contact us! @CustomerSupport", textAlign = TextAlign.Center)
         val DLviewModel = viewModel<DemonListViewModel>()
-        Button(onClick = {
-            DLviewModel.refreshLevelList()
-        }) { Text("Refresh") }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Hello! We failed to process your request in time. Please try again.",
+                textAlign = TextAlign.Center
+            )
+
+            Button(onClick = {
+                DLviewModel.refreshLevelList()
+            }) { Text("Refresh") }
+        }
     }
 }

@@ -7,7 +7,6 @@ import com.regina.mgpa1.ErrorUIs.E408UI
 import com.regina.mgpa1.ErrorUIs.E410UI
 import com.regina.mgpa1.ErrorUIs.E511UI
 import com.regina.mgpa1.ErrorUIs.EDefaulUI
-import com.regina.mgpa1.ErrorUIs.ErrorUIBase
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -16,7 +15,7 @@ import kotlinx.serialization.json.Json
 
 //==Default Variables
 //val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
-val aredlEndPoint = "https://glph1w.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //This is a data class meant for this file.
 data class APIResponse(
