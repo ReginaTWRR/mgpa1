@@ -252,7 +252,6 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 //A Composable function that renders a random demon
 @Composable
 fun RandomDemon(homeViewModel: HomePageViewModel) {
-
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
 
@@ -263,7 +262,6 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
     val generatedDemon by homeViewModel.generatedDemon.collectAsState()
     val demon = generatedDemon
     val LevelDetails: LevelDetails
-
 
     if (demon == null) {
         RenderMessage(
@@ -282,7 +280,6 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
         ErrorHandler(LevelDetails)
         return;
     }
-
 
     Column (
         horizontalAlignment = Alignment.Start,

@@ -143,9 +143,7 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            items(
-                items = games
-            ) { game ->
+            items(items = games) { game ->
                 GameCard(
                     gameName = game.name,
                     onClick = {

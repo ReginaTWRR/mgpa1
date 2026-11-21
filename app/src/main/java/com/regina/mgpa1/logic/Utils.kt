@@ -15,7 +15,7 @@ interface Searchable {
 
 //==FUNCTIONS
 
-//A Composable function to render a level's name and position
+// A Composable function to render a level's name and position
 @Composable
 fun LevelName(level: Level, textColor: Color, modifier: Modifier) {
     Text(
@@ -25,7 +25,7 @@ fun LevelName(level: Level, textColor: Color, modifier: Modifier) {
     )
 }
 
-//A Composable function to show the user a message
+// A Composable function to show the user a message
 @Composable
 fun RenderMessage(text: String, modifier: Modifier) {
     Box(

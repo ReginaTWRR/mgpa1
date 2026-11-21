@@ -5,16 +5,21 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -25,11 +30,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +50,7 @@ import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
 import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.viewModels.DemonListViewModel
+import kotlinx.coroutines.launch
 
 //==CLASSES
 
@@ -70,9 +79,7 @@ class DemonAppSection : AppSection(header = "Demon List") {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    color = MaterialTheme.colorScheme.background
-                )
+                .background(color = MaterialTheme.colorScheme.background)
         ) {
             // Render a header on the top of the section to state the title
             Box(
@@ -85,7 +92,6 @@ class DemonAppSection : AppSection(header = "Demon List") {
                     style = MaterialTheme.typography.titleLarge
                 )
             }
-
             Spacer(modifier = Modifier.height(10.dp))
 
             // Render the list
@@ -125,10 +131,7 @@ fun RenderLevelList(levels: List<Level>) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            .border(width = 1.dp, color = MaterialTheme.colorScheme.onBackground)
     ) {
         //Hi!!! So, for now i made this into a lazy column and it just loads in a text. I
         //tried my best to optimise loading the list. Just saying, theres about 1k+ levels.
@@ -162,15 +165,9 @@ fun LevelCard(level: Level, onClick:(expanded:Boolean)->Unit) {
     var expanded by remember{ mutableStateOf(level.expanded) }
 
     //==MODIFIERS
-    var headerBackground = Modifier.background(Color.Transparent)
-    var contentBackground = headerBackground
-    var textColor = MaterialTheme.colorScheme.inverseSurface
-
-    if (expanded) {
-        headerBackground = Modifier.background(color = MaterialTheme.colorScheme.onBackground)
-        contentBackground = headerBackground
-        textColor = MaterialTheme.colorScheme.background
-    }
+    val headerBackground = Modifier.background(Color.Transparent)
+    val contentBackground = headerBackground
+    val textColor = MaterialTheme.colorScheme.inverseSurface
 
     val fakePaddingModifiers = Modifier.height(16.dp).fillMaxWidth().then(headerBackground)
 
@@ -202,7 +199,10 @@ fun LevelCard(level: Level, onClick:(expanded:Boolean)->Unit) {
             ){
                 //This column is here to organise the spacer and the card contents.
                 //BackGround styling should be done in this Column
-                Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     //So that it looks like the bottom padding(when closed) is here
                     Spacer(modifier = fakePaddingModifiers)
                     CardContent(expandedLevel = level, textColor = textColor)
@@ -222,77 +222,212 @@ fun LevelCard(level: Level, onClick:(expanded:Boolean)->Unit) {
 
 @Composable
 fun CardContent(expandedLevel: Level, textColor: Color) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+    val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
+
+    // Get level details
+    val levelDetails = produceState<LevelDetails?>(
+        initialValue = null,
     ) {
-        // Get level details
-        val levelDetails = produceState<LevelDetails?>(
-            initialValue = null,
-        ) {
-            value = try {
-                GetLevelDetails(LevelID = expandedLevel.level_id)
-            } catch (e: Exception) {
-                println(e.message)
-                null
+        value = try {
+            GetLevelDetails(LevelID = expandedLevel.level_id)
+        } catch (e: Exception) {
+            println(e.message)
+            null
+        }
+    }.value
+
+    // Verify level details
+    //Place Pre-Loaded UI here
+    if(levelDetails == null){
+        Text("loading Level...", textAlign = TextAlign.Center)
+        return
+    }
+    //Response code if id == -1.
+    else if(levelDetails.id == "-1"){
+        ErrorHandler(levelDetails)
+        return
+    }
+
+    val description = expandedLevel.description
+
+    if (description == null)
+    {
+        Text(text = "Failed to render card.", color = textColor)
+        return
+    }
+
+    val tags = expandedLevel.tags
+    val levelID = expandedLevel.level_id
+    val points = expandedLevel.points
+    val edelEnjoyment = expandedLevel.edel_enjoyment
+    val song = expandedLevel.song
+    val nlwTier = expandedLevel.nlw_tier
+    val gddlTier = expandedLevel.gddl_tier
+
+    val verification = levelDetails.verifications[0]
+    val videoURL = verification.video_url
+    val publisher = levelDetails.publisher.global_name
+    val verifier = verification.submitted_by.global_name
+
+    HorizontalDivider(color = textColor)
+    Spacer(modifier = Modifier.height(10.dp))
+
+    // Description
+    Text(text = description, color = textColor, textAlign = TextAlign.Center)
+    Spacer(modifier = Modifier.height(10.dp))
+
+    // Thumbnail of gameplay video
+    //This might break if theres no verification. Be carefull.
+    // Apparently, one level can be verified multiple times. For the purpose of
+    // this UI, we will just use the first one.
+    AsyncImage(
+        model = BuildYTWebImage(YTLink = videoURL),
+        contentDescription = "Youtube thumbnail video of ${levelDetails.name}",
+        contentScale = ContentScale.FillWidth,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable{
+                // Go to the verification (gameplay) Youtube video
+                scope.launch {
+                    uriHandler.openUri(videoURL)
+                }
             }
-        }.value
+    )
+    Spacer(modifier = Modifier.height(10.dp))
 
-        // Verify level details
-        //Place Pre-Loaded UI here
-        if(levelDetails == null){
-            Text("loading Level...", textAlign = TextAlign.Center)
-            return
-        }
-        //Response code if id == -1.
-        else if(levelDetails.id == "-1"){
-            ErrorHandler(levelDetails)
-            return
-        }
+    // Tags
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        tags.forEach { tag ->
+            if (tag == null) return@forEach
 
-        val description = expandedLevel.description
-
-        if (description == null)
-        {
-            Text(text = "Failed to render card.", color = textColor)
-            return
-        }
-
-        val verification = levelDetails.verifications[0]
-        val videoURL = verification.video_url
-
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Description
-        Text(text = description, color = textColor, textAlign = TextAlign.Center)
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Thumbnail of gameplay video
-        //This might break if theres no verification. Be carefull.
-        // Apparently, one level can be verified multiple times. For the purpose of
-        // this UI, we will just use the first one.
-        AsyncImage(
-            model = BuildYTWebImage(YTLink = videoURL),
-            contentDescription = "Youtube thumbnail video of ${levelDetails.name}"
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
-                // Publisher
-                Text(
-                    text = "Published by: ${levelDetails.publisher.global_name}",
-                    color = textColor
+            Row(
+                modifier = Modifier.border(
+                    width = 1.dp,
+                    color = textColor,
+                    shape = RoundedCornerShape(size = 10.dp)
                 )
-                // Verifier
+            ) {
                 Text(
-                    text = "Verified by: ${verification.submitted_by.global_name}",
-                    color = textColor
+                    text = tag,
+                    color = textColor,
+                    modifier = Modifier.padding(all = 5.dp)
                 )
             }
         }
     }
+    Spacer(modifier = Modifier.height(10.dp))
+
+    Row {
+        // Level ID
+        DescriptionLevelInfo(
+            infoLabel = "LEVEL ID",
+            infoValue = "$levelID",
+            valueColor = textColor
+        )
+
+        // List points
+        DescriptionLevelInfo(
+            infoLabel = "LIST POINTS",
+            infoValue = "$points",
+            valueColor = textColor
+        )
+
+        // Edel enjoyment
+        DescriptionLevelInfo(
+            infoLabel = "EDEL ENJOYMENT",
+            infoValue = "$edelEnjoyment",
+            valueColor = textColor
+        )
+    }
+    Spacer(modifier = Modifier.width(10.dp))
+
+    Row {
+        // Song
+        DescriptionLevelInfo(
+            infoLabel = "SONG",
+            infoValue = "$song",
+            valueColor = textColor
+        )
+
+        // NLW tier
+        DescriptionLevelInfo(
+            infoLabel = "NLW TIER",
+            infoValue = "$nlwTier",
+            valueColor = textColor
+        )
+
+        // GDDL tier
+        DescriptionLevelInfo(
+            infoLabel = "GDDL TIER",
+            infoValue = "$gddlTier",
+            valueColor = textColor
+        )
+    }
+    Spacer(modifier = Modifier.width(10.dp))
+
+    Column {
+        // Publisher
+        Row {
+            DescriptionLabel(text = "PUBLISHER")
+            Spacer(modifier = Modifier.width(5.dp))
+            DescriptionValue(text = publisher, textColor = textColor)
+        }
+        Spacer(modifier = Modifier.height(5.dp))
+
+        // Verifier
+        Row {
+            DescriptionLabel(text = "VERIFIER")
+            Spacer(modifier = Modifier.width(5.dp))
+            DescriptionValue(text = verifier, textColor = textColor)
+        }
+        Spacer(modifier = Modifier.height(5.dp))
+
+        // Creators
+        Row {
+            DescriptionLabel(text = "CREATORS")
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+    }
+    Spacer(modifier = Modifier.height(10.dp))
+
+    HorizontalDivider(color = textColor)
+}
+
+// A function to render a level info (e.g. Level ID, song, etc.)
+@Composable
+fun RowScope.DescriptionLevelInfo(
+    infoLabel: String, infoValue: String, valueColor: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.weight(1f)
+    ) {
+        DescriptionLabel(text = infoLabel)
+        Spacer(modifier = Modifier.height(5.dp))
+        DescriptionValue(text = infoValue, textColor = valueColor)
+    }
+}
+
+// A function to render a description label
+@Composable
+fun DescriptionLabel(text: String) {
+    Text(
+        text = text,
+        color = MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.labelSmall
+    )
+}
+
+// A function to render a description value
+@Composable
+fun DescriptionValue(text: String, textColor: Color) {
+    Text(
+        text = text,
+        color = textColor,
+        style = MaterialTheme.typography.labelSmall
+    )
 }

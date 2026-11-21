@@ -233,7 +233,7 @@ fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
             modifier = Modifier.matchParentSize()
         )
 
-        LevelInfo(
+        GameLevelInfo(
             levelName = knownLevel.name,
             position = knownPos
         )
@@ -267,7 +267,7 @@ fun UnknownRegion(
             modifier = Modifier.matchParentSize()
         )
 
-        LevelInfo(
+        GameLevelInfo(
             levelName = unknownLevel.name,
             position = uiUnknownPos
         )
@@ -276,7 +276,7 @@ fun UnknownRegion(
 
 //A Composable function that renders level information
 @Composable
-fun LevelInfo(levelName: String, position: Int) {
+fun GameLevelInfo(levelName: String, position: Int) {
     val positionValue = if (position > 0) position.toString() else "???"
 
     Text(

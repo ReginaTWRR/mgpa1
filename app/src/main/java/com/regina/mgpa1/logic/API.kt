@@ -19,8 +19,8 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 
 //==Default Variables
-//val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
-val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+//val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //This is a data class meant for this file.
 data class APIResponse(
