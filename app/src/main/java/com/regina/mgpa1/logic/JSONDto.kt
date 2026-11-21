@@ -110,3 +110,12 @@ data class LevelDetails(
     val publisher: User,
     val verifications:List<Verification>
 )
+
+// List all creators
+@Serializable
+data class Creator (
+    val id : String,
+    val username : String,
+    val global_name: String
+) {
+}

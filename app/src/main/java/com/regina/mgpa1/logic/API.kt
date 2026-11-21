@@ -106,6 +106,24 @@ suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
     return results
 }
 
+// A function to get the creators of a level
+suspend fun GetLevelCreators(LevelID: Int): List<Creator> {
+    val response = withContext(Dispatchers.IO) {
+        getfromAPI(inputString = "/api/aredl/levels/$LevelID/creators")
+    }
+    val results: List<Creator>
+
+    if (response.responseCode in 200..300) {
+        results = Json.decodeFromString<List<Creator>>(response.content)
+    } else {
+        results = listOf(
+            Creator(id = "-1", username = "Error", global_name = "Error")
+        )
+    }
+
+    return results
+}
+
 //==OTHER FUNCS
 //These funcs are random, un categorised functions.
 

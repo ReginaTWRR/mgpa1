@@ -44,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.logic.BuildYTWebImage
+import com.regina.mgpa1.logic.Creator
 import com.regina.mgpa1.logic.ErrorHandler
+import com.regina.mgpa1.logic.GetLevelCreators
 import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
@@ -249,6 +251,32 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
         return
     }
 
+    // Get level creators
+    val levelCreators = produceState<List<Creator>?>(
+        initialValue = emptyList()
+    ) {
+        value = try {
+            GetLevelCreators(LevelID = expandedLevel.level_id)
+        } catch (e: Exception) {
+            println(e.message)
+            null
+        }
+    }.value
+
+    // Verify level creators
+    //Place Pre-Loaded UI here
+    if(levelCreators == null){
+        Text("Loading level...", textAlign = TextAlign.Center)
+        return
+    }
+    //Response code if id == -1.
+    for ((id) in levelCreators) {
+        if(id == "-1"){
+            ErrorHandler(ErrorDetails = levelDetails)
+            return
+        }
+    }
+
     val description = expandedLevel.description
 
     if (description == null)
@@ -369,7 +397,9 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
     }
     Spacer(modifier = Modifier.width(10.dp))
 
-    Column {
+    Column(
+        modifier = Modifier.padding(start = 5.dp)
+    ) {
         // Publisher
         Row {
             DescriptionLabel(text = "PUBLISHER")
@@ -390,6 +420,14 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
         Row {
             DescriptionLabel(text = "CREATORS")
             Spacer(modifier = Modifier.width(5.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                levelCreators.forEach { creator ->
+                    DescriptionValue(text = creator.global_name, textColor = textColor)
+                }
+            }
         }
     }
     Spacer(modifier = Modifier.height(10.dp))
