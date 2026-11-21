@@ -242,6 +242,7 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
         items(levelList) { level ->
             LevelName(
                 level = level,
+                textColor = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -306,6 +307,7 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
         ) {
             LevelName(
                 level = demon,
+                textColor = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.weight(1f)
             )
 

@@ -1,6 +1,5 @@
 package com.regina.mgpa1.sections
 
-import android.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,24 +42,27 @@ import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
 import com.regina.mgpa1.logic.LevelName
 import com.regina.mgpa1.viewModels.DemonListViewModel
-import kotlin.math.exp
 
 //==CLASSES
 
 //A class that implements the Demon section of the App
 class DemonAppSection : AppSection(header = "Demon List") {
-
     @Preview
     @Composable
     override fun SectionLayout() {
         // Access the view model and get the level list
         val viewModel = viewModel<DemonListViewModel>()
         val levelList by viewModel.levelList.collectAsState()
-        if(levelList.isEmpty())
+
+        if (levelList.isEmpty())
+        {
+            Text(text = "Loading levels...", textAlign = TextAlign.Center)
             return
-        val ErrorLevel = levelList[0]
-        if(ErrorLevel.id.equals("-1")){
-            ErrorHandler(ErrorLevel)
+        }
+
+        val errorLevel = levelList[0]
+        if (errorLevel.id == "-1") {
+            ErrorHandler(errorLevel)
             return
         }
 
@@ -115,7 +118,7 @@ fun RenderLevelList(levels: List<Level>) {
     var hi by rememberSaveable{mutableStateOf(false)}
     println("adsdgfdlfjgbh $hi")
     if(!hi){
-        hi = true;
+        hi = true
         println("hi")
     }
     LazyColumn(
@@ -138,7 +141,7 @@ fun RenderLevelList(levels: List<Level>) {
         ) { level ->
             if(level.position == 1){
                 if(!initialised){
-                    initialised = true;
+                    initialised = true
                     println("WE CAN OVERCOME THEIR POWER~~~")
                    level.expanded = true
                 }
@@ -153,32 +156,38 @@ fun RenderLevelList(levels: List<Level>) {
 
 //A Composable function that defines how we show the level details
 @Composable
-fun LevelCard(level: Level,Expanded: Boolean = false,onClick:(expanded:Boolean)->Unit) {
+fun LevelCard(level: Level, onClick:(expanded:Boolean)->Unit) {
     //Card Variables
     //This forcefully triggers recomposition. when the card is loaded, it gets updated to the accurate state.
     var expanded by remember{ mutableStateOf(level.expanded) }
-//    val expanded = level.expanded;
-//    if(level.position == 1){
-//        println("1 $initialised")
-//        if(!initialised){
-//            initialised = true;
-//            println("2 $initialised")
-////            expanded = true;
-//        }
-//    }
 
     //==MODIFIERS
-    val headerBackground = Modifier.background(Color.Transparent)
-    val contentBackground = Modifier.background(Color.Transparent)
+    var headerBackground = Modifier.background(Color.Transparent)
+    var contentBackground = headerBackground
+    var textColor = MaterialTheme.colorScheme.inverseSurface
+
+    if (expanded) {
+        headerBackground = Modifier.background(color = MaterialTheme.colorScheme.onBackground)
+        contentBackground = headerBackground
+        textColor = MaterialTheme.colorScheme.background
+    }
+
     val fakePaddingModifiers = Modifier.height(16.dp).fillMaxWidth().then(headerBackground)
+
     Card(modifier =  Modifier.fillMaxSize()) {
         Column(
-//            modifier = Modifier.fillMaxWidth().clickable{expanded = !expanded}.then(headerBackground),
-            modifier = Modifier.fillMaxWidth().clickable{onClick(!level.expanded);expanded = !expanded}.then(headerBackground),
-            horizontalAlignment = Alignment.CenterHorizontally){
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable{
+                    onClick(!level.expanded);expanded = !expanded
+                }.then(other = headerBackground),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Spacer(modifier = fakePaddingModifiers)
+
             //Render Level Name
-            LevelName(level, modifier = Modifier)
+            LevelName(level, textColor, modifier = Modifier)
+
             AnimatedVisibility(
                 visible = expanded,
                 Modifier.fillMaxWidth()
@@ -191,33 +200,12 @@ fun LevelCard(level: Level,Expanded: Boolean = false,onClick:(expanded:Boolean)-
                         }
                     ).then(contentBackground)
             ){
-
-                //Only grab the Details here and not when the entire func is called
-                val levelDetails = produceState<LevelDetails?>(
-                    initialValue = null,
-                ){
-                    value = try {
-                        GetLevelDetails(LevelID = level.level_id)
-                    } catch (e: Exception) {
-                        null
-                    }
-                }.value
                 //This column is here to organise the spacer and the card contents.
                 //BackGround styling should be done in this Column
                 Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     //So that it looks like the bottom padding(when closed) is here
                     Spacer(modifier = fakePaddingModifiers)
-                    //Place Pre-Loaded UI here
-                    if(levelDetails == null){
-                        Text("loading Level...", textAlign = TextAlign.Center)
-                    }
-                    //Response code if id == -1.
-                    else if(levelDetails.id == "-1"){
-                        ErrorHandler(levelDetails)
-                    }
-                    else {
-                        CardContent(levelDetails)
-                    }
+                    CardContent(expandedLevel = level, textColor = textColor)
                 }
             }
             //get rid of ugly spacing if its expanded
@@ -233,31 +221,77 @@ fun LevelCard(level: Level,Expanded: Boolean = false,onClick:(expanded:Boolean)-
 }
 
 @Composable
-fun CardContent(levelDetails: LevelDetails?){
+fun CardContent(expandedLevel: Level, textColor: Color) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Get level details
+        val levelDetails = produceState<LevelDetails?>(
+            initialValue = null,
+        ) {
+            value = try {
+                GetLevelDetails(LevelID = expandedLevel.level_id)
+            } catch (e: Exception) {
+                println(e.message)
+                null
+            }
+        }.value
+
+        // Verify level details
+        //Place Pre-Loaded UI here
+        if(levelDetails == null){
+            Text("loading Level...", textAlign = TextAlign.Center)
+            return
+        }
+        //Response code if id == -1.
+        else if(levelDetails.id == "-1"){
+            ErrorHandler(levelDetails)
+            return
+        }
+
+        val description = expandedLevel.description
+
+        if (description == null)
+        {
+            Text(text = "Failed to render card.", color = textColor)
+            return
+        }
+
+        val verification = levelDetails.verifications[0]
+        val videoURL = verification.video_url
+
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Description
+        Text(text = description, color = textColor, textAlign = TextAlign.Center)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Thumbnail of gameplay video
         //This might break if theres no verification. Be carefull.
         // Apparently, one level can be verified multiple times. For the purpose of
         // this UI, we will just use the first one.
-        val videoURL = levelDetails?.verifications[0]?.video_url
-
-        if (videoURL != null) {
-            AsyncImage(
-                model = BuildYTWebImage(YTLink = videoURL),
-                contentDescription = "Youtube thumbnail video of ${levelDetails.name}"
-            )
-        } else {
-            Text(text = "Image failed to load.")
-        }
+        AsyncImage(
+            model = BuildYTWebImage(YTLink = videoURL),
+            contentDescription = "Youtube thumbnail video of ${levelDetails.name}"
+        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(10.dp))
-            Column() {
-                Text(text = "Published by: ${levelDetails?.publisher?.global_name}")
-                Text(text = "Verified by: ${levelDetails?.verifications[0]?.submitted_by?.global_name}")
+            Column {
+                // Publisher
+                Text(
+                    text = "Published by: ${levelDetails.publisher.global_name}",
+                    color = textColor
+                )
+                // Verifier
+                Text(
+                    text = "Verified by: ${verification.submitted_by.global_name}",
+                    color = textColor
+                )
             }
         }
     }

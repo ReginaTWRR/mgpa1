@@ -24,31 +24,26 @@ import kotlinx.coroutines.launch
 
 //An enum class to store where each nav button needs to go to
 enum class NavDestination(
-    val route: String,
     val label: String,
     @param:DrawableRes val icon : Int,
     val contentDescription: String
 ){
     HOME(
-        route = "HOME",
         label = "Home",
         icon = R.drawable.home_page_icon,
         contentDescription = "Home"
     ),
     DEMON(
-        route = "DEMON",
         label = "Demon List",
         icon = R.drawable.demon_page_icon,
         contentDescription = "Demon List"
     ),
     GAMES(
-        route = "GAMES",
         label = "Games",
         icon = R.drawable.games_page_icon,
         contentDescription = "Games"
     ),
     LOGIN(
-        route = "LOGIN",
         label = "Login",
         icon = R.drawable.login_page_icon,
         contentDescription = "Login"
@@ -73,7 +68,7 @@ class SectionNavigation {
         val destinations = NavDestination.entries
 
         val pagerState = rememberPagerState(
-            initialPage = NavDestination.HOME.ordinal,
+            initialPage = NavDestination.DEMON.ordinal,
             pageCount = { destinations.size }
         )
 
@@ -110,7 +105,7 @@ class SectionNavigation {
         )
 
         //Handle Backward navigation gestures || Note: might have issues because we dont do any priority handling
-        BackHandler() {
+        BackHandler {
             scope.launch {
                 pagerState.animateScrollToPage(0)
             }
