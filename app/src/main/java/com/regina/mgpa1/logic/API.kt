@@ -5,6 +5,11 @@ import com.regina.mgpa1.ErrorUIs.E400UI
 import com.regina.mgpa1.ErrorUIs.E404UI
 import com.regina.mgpa1.ErrorUIs.E408UI
 import com.regina.mgpa1.ErrorUIs.E410UI
+import com.regina.mgpa1.ErrorUIs.E423UI
+import com.regina.mgpa1.ErrorUIs.E429UI
+import com.regina.mgpa1.ErrorUIs.E500UI
+import com.regina.mgpa1.ErrorUIs.E502UI
+import com.regina.mgpa1.ErrorUIs.E504UI
 import com.regina.mgpa1.ErrorUIs.E511UI
 import com.regina.mgpa1.ErrorUIs.EDefaulUI
 import java.io.IOException
@@ -162,6 +167,11 @@ private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
         404-> E404UI().ErrorLayout(ErrorCode,ErrorMessage)
         408-> E408UI().ErrorLayout(ErrorCode,ErrorMessage)
         410-> E410UI().ErrorLayout(ErrorCode,ErrorMessage)
+        423-> E423UI().ErrorLayout(ErrorCode, ErrorMessage)
+        429-> E429UI().ErrorLayout(ErrorCode, ErrorMessage)
+        500-> E500UI().ErrorLayout(ErrorCode, ErrorMessage)
+        502-> E502UI().ErrorLayout(ErrorCode, ErrorMessage)
+        504-> E504UI().ErrorLayout(ErrorCode, ErrorMessage)
         511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
         else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }

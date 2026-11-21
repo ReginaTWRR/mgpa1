@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,7 +23,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -50,9 +48,7 @@ import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.logic.RenderMessage
-import com.regina.mgpa1.sections.NavDestination
 import com.regina.mgpa1.viewModels.DemonListViewModel
-import kotlinx.coroutines.launch
 
 //==CLASSES
 
@@ -78,12 +74,13 @@ class HigherLowerGame(
             //Center both button and Error UI.
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 ErrorHandler(ErrorLevel)
+                Spacer(modifier = Modifier.height(10.dp))
                 Button(onClick = returnOverviewPage) { Text("return to Games Page") }
             }
             return
         }
 
-        val levels = listOf<Level?>(
+        val levels = listOf(
             levelList.randomOrNull(), levelList.randomOrNull()
         )
 
@@ -215,15 +212,15 @@ class HigherLowerGame(
 }
 
 //An enum class that defines the choices a user can make
-enum class UserChoice() {
-    NONE, HIGHER, LOWER
+enum class UserChoice {
+    HIGHER, LOWER
 }
 
 //==FUNCTIONS
 
 //A Composable function that renders the known region
 @Composable
-fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
+fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -245,9 +242,9 @@ fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int
 
 //A Composable function that renders the unknown region
 @Composable
-fun ColumnScope.UnknownRegion(
+fun UnknownRegion(
     modifier: Modifier,
-    unknownLevel: Level, UIUnknownPos: Int,
+    unknownLevel: Level, uiUnknownPos: Int,
     onClick: () -> Unit
 ) {
     Box(
@@ -272,7 +269,7 @@ fun ColumnScope.UnknownRegion(
 
         LevelInfo(
             levelName = unknownLevel.name,
-            position = UIUnknownPos
+            position = uiUnknownPos
         )
     }
 }
@@ -366,6 +363,5 @@ fun evaluateChoice(
     return when (choice) {
         UserChoice.HIGHER -> (unknownPos < knownPos)
         UserChoice.LOWER -> (unknownPos > knownPos)
-        else -> false
     }
 }
