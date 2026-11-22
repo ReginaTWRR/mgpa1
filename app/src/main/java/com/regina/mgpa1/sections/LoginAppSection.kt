@@ -40,7 +40,6 @@ class LoginAppSection : AppSection(header = "Login") {
         }
     }
 
-    @Preview
     @Composable
     fun loginPage() {
         //Input Field Variables

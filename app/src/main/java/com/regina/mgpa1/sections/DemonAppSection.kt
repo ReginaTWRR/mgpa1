@@ -127,11 +127,6 @@ fun RenderLevelList(levels: List<Level>) {
                 color = MaterialTheme.colorScheme.onBackground
             )
     ) {
-        //Hi!!! So, for now i made this into a lazy column and it just loads in a text. I
-        //tried my best to optimise loading the list. Just saying, theres about 1k+ levels.
-        //There are 2 options. A: Limit the list. B: Optimise the loading (somehow). C:Load once,
-        //Store the info in memory(possible sideffects). You can try to explore your own solutions so yea
-        //Good luck
         items(
             items = levels,
             key = { level -> level.id }
@@ -139,7 +134,6 @@ fun RenderLevelList(levels: List<Level>) {
             if(level.position == 1){
                 if(!initialised){
                     initialised = true;
-                    println("WE CAN OVERCOME THEIR POWER~~~")
                    level.expanded = true
                 }
             }
@@ -153,19 +147,11 @@ fun RenderLevelList(levels: List<Level>) {
 
 //A Composable function that defines how we show the level details
 @Composable
-fun LevelCard(level: Level,Expanded: Boolean = false,onClick:(expanded:Boolean)->Unit) {
+fun LevelCard(level: Level,onClick:(expanded:Boolean)->Unit) {
+
     //Card Variables
     //This forcefully triggers recomposition. when the card is loaded, it gets updated to the accurate state.
     var expanded by remember{ mutableStateOf(level.expanded) }
-//    val expanded = level.expanded;
-//    if(level.position == 1){
-//        println("1 $initialised")
-//        if(!initialised){
-//            initialised = true;
-//            println("2 $initialised")
-////            expanded = true;
-//        }
-//    }
 
     //==MODIFIERS
     val headerBackground = Modifier.background(Color.Transparent)
