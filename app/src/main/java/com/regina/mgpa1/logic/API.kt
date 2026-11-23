@@ -6,12 +6,16 @@ import com.regina.mgpa1.ErrorUIs.E404UI
 import com.regina.mgpa1.ErrorUIs.E408UI
 import com.regina.mgpa1.ErrorUIs.E410UI
 import com.regina.mgpa1.ErrorUIs.E511UI
+import com.regina.mgpa1.ErrorUIs.E600UI
 import com.regina.mgpa1.ErrorUIs.EDefaulUI
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 //==Default Variables
 //val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
@@ -56,7 +60,25 @@ suspend fun getfromAPI(inputString : String): APIResponse{
             }
         }
         catch (e: IOException){
-            println("Reading Error:${e.message}. Cause: ${e.cause}")
+            when(e){
+                is UnknownHostException -> {
+                    response.responseCode = 600
+                    response.content = "No internet connection or DNS lookup failed"
+                }
+                is SocketTimeoutException -> {
+                    response.responseCode = 600
+                    response.content = "Connection Time out."
+                }
+                is ConnectException -> {
+                    response.responseCode = 600
+                    response.content = "Connection Refusal."
+                }
+                else -> {
+                    println("code${response.responseCode}")
+                    println("Reading Error:${e.message}. Cause: ${e.cause}")
+                }
+            }
+
         }
         finally {
             disconnect()
@@ -163,6 +185,7 @@ private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
         408-> E408UI().ErrorLayout(ErrorCode,ErrorMessage)
         410-> E410UI().ErrorLayout(ErrorCode,ErrorMessage)
         511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
+//        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
         else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }
 }

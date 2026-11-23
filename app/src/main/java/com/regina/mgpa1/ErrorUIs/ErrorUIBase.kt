@@ -18,7 +18,7 @@ interface ErrorUIInterface{
     @Composable
     fun ErrorResolution(){}
 }
-
+//Error 600 is my own response header. It basically means no internet.
 abstract class ErrorUIBase: ErrorUIInterface{
     val contactMessage = "Please contact us! @CustomerSupport"
 
