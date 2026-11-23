@@ -5,6 +5,11 @@ import com.regina.mgpa1.ErrorUIs.E400UI
 import com.regina.mgpa1.ErrorUIs.E404UI
 import com.regina.mgpa1.ErrorUIs.E408UI
 import com.regina.mgpa1.ErrorUIs.E410UI
+import com.regina.mgpa1.ErrorUIs.E423UI
+import com.regina.mgpa1.ErrorUIs.E429UI
+import com.regina.mgpa1.ErrorUIs.E500UI
+import com.regina.mgpa1.ErrorUIs.E502UI
+import com.regina.mgpa1.ErrorUIs.E504UI
 import com.regina.mgpa1.ErrorUIs.E511UI
 import com.regina.mgpa1.ErrorUIs.E600UI
 import com.regina.mgpa1.ErrorUIs.EDefaulUI
