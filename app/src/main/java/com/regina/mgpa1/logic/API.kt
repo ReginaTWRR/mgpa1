@@ -5,11 +5,6 @@ import com.regina.mgpa1.ErrorUIs.E400UI
 import com.regina.mgpa1.ErrorUIs.E404UI
 import com.regina.mgpa1.ErrorUIs.E408UI
 import com.regina.mgpa1.ErrorUIs.E410UI
-import com.regina.mgpa1.ErrorUIs.E423UI
-import com.regina.mgpa1.ErrorUIs.E429UI
-import com.regina.mgpa1.ErrorUIs.E500UI
-import com.regina.mgpa1.ErrorUIs.E502UI
-import com.regina.mgpa1.ErrorUIs.E504UI
 import com.regina.mgpa1.ErrorUIs.E511UI
 import com.regina.mgpa1.ErrorUIs.E600UI
 import com.regina.mgpa1.ErrorUIs.EDefaulUI
@@ -23,8 +18,8 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 //==Default Variables
-//val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+//val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //This is a data class meant for this file.
 data class APIResponse(
@@ -213,7 +208,7 @@ private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
         502-> E502UI().ErrorLayout(ErrorCode, ErrorMessage)
         504-> E504UI().ErrorLayout(ErrorCode, ErrorMessage)
         511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
-//        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
+        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
         else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }
 }
