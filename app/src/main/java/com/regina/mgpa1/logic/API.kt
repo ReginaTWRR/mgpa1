@@ -18,8 +18,8 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 //==Default Variables
-//val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
-val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+//val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //This is a data class meant for this file.
 data class APIResponse(
@@ -185,7 +185,7 @@ private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
         408-> E408UI().ErrorLayout(ErrorCode,ErrorMessage)
         410-> E410UI().ErrorLayout(ErrorCode,ErrorMessage)
         511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
-//        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
+        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
         else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }
 }
