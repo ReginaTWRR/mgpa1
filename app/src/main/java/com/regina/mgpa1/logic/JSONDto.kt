@@ -1,14 +1,11 @@
 //This file is for storing the JSON data to object classes
 
-package com.regina.mgpa1
+package com.regina.mgpa1.logic
 
+import android.os.Parcelable
 import kotlinx.datetime.Instant
-import kotlinx.serialization.KSerializer
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-
 
 //==ENUMS
 //the enums that some data classes use
@@ -25,6 +22,7 @@ enum class STATUS{
 //Refer to the ARDEL/other APIS API for more details on these classes. I'll leave a comment as to where these came from
 //List all Levels
 @Serializable
+@Parcelize
 data class Level(
     val id : String,
     val name : String,
@@ -46,7 +44,25 @@ data class Level(
     val gddl_tier: Float ?= null,
     val nlw_tier: String ?= null,
     val completed_by_user: Boolean ?= null
-)
+) : Parcelable, Searchable {
+    override fun doesMatchSearchQuery(query: String): Boolean {
+        // Check if the query is blank
+        if (query.isBlank()) return false
+
+        // List of what the user could be searching for
+        val matchingCombinations = listOf(
+            name,
+            "$position",
+            id
+        )
+
+        return matchingCombinations.any {
+            it.contains(other = query, ignoreCase = true)
+        }
+    }
+
+}
+
 //Aredl Get Level Details
 @Serializable
 data class User(

@@ -1,8 +1,7 @@
-import org.gradle.internal.impldep.org.joda.time.DateTime
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id(libs.plugins.kotlin.parcelize.get().pluginId)
     kotlin("plugin.serialization") version "2.4.21"
 }
 
@@ -42,6 +41,7 @@ android {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)

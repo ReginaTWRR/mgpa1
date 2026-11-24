@@ -1,19 +1,10 @@
-package com.regina.mgpa1
+package com.regina.mgpa1.logic
 
-import android.util.JsonReader
-import androidx.annotation.RestrictTo
-import java.util.UUID
-import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.time.Instant
 import java.net.URL
-import kotlinx.serialization.*
+import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import java.io.StreamTokenizer
-import java.time.LocalDateTime
-import kotlin.uuid.Uuid
-
 
 //==Default Variables
 val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
@@ -21,7 +12,8 @@ val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat t
 //This is a data class meant for this file.
 data class APIResponse(
     var responseCode:Int = -1, //the response code that the api returns
-    var content: String = "Unsuccessful" //the content that the api returns
+    var content: String = "Unsuccessful", //the content that the api returns
+    var URL : String = ""
 )
 
 //==API FUNCS
@@ -32,13 +24,14 @@ data class APIResponse(
 suspend fun getfromAPI(inputString : String): APIResponse{
     //Define URL
     val url = URL("$aredlEndPoint$inputString")
-    var response : APIResponse = APIResponse()
+    val response : APIResponse = APIResponse()
     with(withContext(Dispatchers.IO) {url.openConnection()} as HttpURLConnection){
         try{
             requestMethod = "GET"
             response.responseCode = responseCode
             if(responseCode !in 200..300){
                 response.content = responseMessage
+                response.URL = url.toString()
             }
             else{
                 //set response content to be the thing
@@ -50,6 +43,7 @@ suspend fun getfromAPI(inputString : String): APIResponse{
                         inputLine = it.readLine()
                     }
                    response.content = _response.toString()
+                   response.URL = url.toString()
                 }
             }
         }
@@ -67,7 +61,7 @@ suspend fun getfromAPI(inputString : String): APIResponse{
 //==JSON Parsers
 
 suspend fun GetLevelList():List<Level>{
-    val scope = CoroutineScope(Dispatchers.Default)
+//    val scope = CoroutineScope(Dispatchers.Default)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels")}
     val results = Json.decodeFromString<List<Level>>(response.content)
 
@@ -95,7 +89,7 @@ fun BuildYTWebImage(YTLink : String,useMaxRes :Boolean = false) : String{
     splitLink = YTLink.split("=","&","youtu.be/","live/","?si=","?is")
     println(splitLink)
 
-    val listofIllegalChars = listOf<String>("!","&","@","#","-")
+    val listofIllegalChars = listOf<String>("!","&","@","#")
     //Verify Video ID
     for (chars in listofIllegalChars) {
         if(splitLink[1].contains(chars)){
