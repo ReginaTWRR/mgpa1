@@ -213,7 +213,7 @@ private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
         502-> E502UI().ErrorLayout(ErrorCode, ErrorMessage)
         504-> E504UI().ErrorLayout(ErrorCode, ErrorMessage)
         511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
-//        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
+        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
         else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
     }
 }
