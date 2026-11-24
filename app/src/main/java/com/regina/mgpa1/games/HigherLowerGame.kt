@@ -1,5 +1,6 @@
 package com.regina.mgpa1.games
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,7 +57,8 @@ import com.regina.mgpa1.viewModels.DemonListViewModel
 
 // A class that implements the Higher Lower game
 class HigherLowerGame(
-    val onGameExit: () -> Unit
+    val onGameExit: () -> Unit,
+    val returnOverviewPage: () -> Unit
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
@@ -70,6 +72,7 @@ class HigherLowerGame(
         var unknownLevel by rememberSaveable {
             mutableStateOf<Level?>(value = null)
         }
+
         // LaunchedEffect: This block of code runs when levelList changes
         // (i.e. Finishes loading)
         LaunchedEffect(key1 = levelList) {
@@ -114,6 +117,11 @@ class HigherLowerGame(
 
         var shouldShowPanel by remember {
             mutableStateOf(value = false)
+        }
+
+        BackHandler {
+            // Go back to the Games section
+            returnOverviewPage()
         }
 
         // Used to overlay the ChoiceButtons over everything else
