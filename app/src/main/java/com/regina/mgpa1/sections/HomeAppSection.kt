@@ -45,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.ErrorUIs.preLoadedUI
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.R
 import com.regina.mgpa1.logic.ErrorHandler
@@ -261,19 +262,18 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
     // actually loads.
     val generatedDemon by homeViewModel.generatedDemon.collectAsState()
     val demon = generatedDemon
-    val LevelDetails: LevelDetails
-
+    var LevelDetails: LevelDetails
+    var imageLoading by remember { mutableStateOf(false) }
     if (demon == null) {
-        RenderMessage(
-            text = "Loading demon...",
-            modifier = Modifier.fillMaxWidth()
-        )
+        preLoadedUI()
         return
     }
+
     //Place this here to ensure demon != null
     runBlocking {
         LevelDetails = GetLevelDetails(demon.level_id)
     }
+
 
     //Response code check for levelDetails
     if(LevelDetails.id == "-1"){
@@ -290,10 +290,16 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(10.dp))
+        if(imageLoading){
+            preLoadedUI()
+        }
         AsyncImage(
             model = GetLevelThumbnail(LevelID = demon.level_id),
             contentDescription = "${demon.name} thumbnail",
-            error = painterResource(android.R.drawable.ic_dialog_alert)
+            error = painterResource(android.R.drawable.ic_dialog_alert),
+            onLoading = {imageLoading = true},
+            onError =  {imageLoading = false},
+            onSuccess =  {imageLoading = false}
         )
         Spacer(modifier = Modifier.height(10.dp))
 
