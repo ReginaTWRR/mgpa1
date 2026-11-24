@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.ErrorUIs.preLoadedUI
 import com.regina.mgpa1.logic.BuildYTWebImage
 import com.regina.mgpa1.logic.Creator
 import com.regina.mgpa1.logic.ErrorHandler
@@ -65,9 +66,8 @@ class DemonAppSection : AppSection(header = "Demon List") {
         val viewModel = viewModel<DemonListViewModel>()
         val levelList by viewModel.levelList.collectAsState()
 
-        if (levelList.isEmpty())
-        {
-            Text(text = "Loading levels...", textAlign = TextAlign.Center)
+        if (levelList.isEmpty()) {
+            preLoadedUI()
             return
         }
 
@@ -107,10 +107,7 @@ class DemonAppSection : AppSection(header = "Demon List") {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(
-                        text = "Loading levels...",
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    preLoadedUI()
                 }
             }
         }
@@ -242,7 +239,7 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
     // Verify level details
     //Place Pre-Loaded UI here
     if(levelDetails == null){
-        Text("loading Level...", textAlign = TextAlign.Center)
+        preLoadedUI()
         return
     }
     //Response code if id == -1.
@@ -266,7 +263,7 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
     // Verify level creators
     //Place Pre-Loaded UI here
     if(levelCreators == null){
-        Text("Loading level...", textAlign = TextAlign.Center)
+        preLoadedUI()
         return
     }
     //Response code if id == -1.
@@ -277,12 +274,10 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
         }
     }
 
-    val description = expandedLevel.description
+    var description = expandedLevel.description
 
-    if (description == null)
-    {
-        Text(text = "Failed to render card.", color = textColor)
-        return
+    if (description == null) {
+        description = "This level does not have a description yet."
     }
 
     val tags = expandedLevel.tags
@@ -297,6 +292,7 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
     val videoURL = verification.video_url
     val publisher = levelDetails.publisher.global_name
     val verifier = verification.submitted_by.global_name
+    var imageLoading by remember { mutableStateOf(false) } //Check if we need to load preloaded or image
 
     HorizontalDivider(color = textColor)
     Spacer(modifier = Modifier.height(10.dp))
@@ -305,6 +301,9 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
     Text(text = description, color = textColor, textAlign = TextAlign.Center)
     Spacer(modifier = Modifier.height(10.dp))
 
+    if(imageLoading){
+        preLoadedUI()
+    }
     // Thumbnail of gameplay video
     //This might break if theres no verification. Be carefull.
     // Apparently, one level can be verified multiple times. For the purpose of
@@ -320,7 +319,10 @@ fun CardContent(expandedLevel: Level, textColor: Color) {
                 scope.launch {
                     uriHandler.openUri(videoURL)
                 }
-            }
+            },
+        onLoading = {imageLoading = true},
+        onError =  {imageLoading = false},
+        onSuccess =  {imageLoading = false}
     )
     Spacer(modifier = Modifier.height(10.dp))
 

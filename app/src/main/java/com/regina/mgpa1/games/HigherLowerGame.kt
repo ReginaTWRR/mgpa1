@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.ErrorUIs.preLoadedUI
 import com.regina.mgpa1.sections.AppSection
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.logic.Level
@@ -97,10 +98,7 @@ class HigherLowerGame(
         val currentUnknownLevel = unknownLevel
 
         if (currentKnownLevel == null || currentUnknownLevel == null) {
-            RenderMessage(
-                text = "Loading levels...",
-                modifier = Modifier.fillMaxWidth()
-            )
+            preLoadedUI()
             return
         }
 
@@ -221,6 +219,8 @@ enum class UserChoice {
 //A Composable function that renders the known region
 @Composable
 fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
+    var imageLoading by remember { mutableStateOf(false) } //Check if we need to load preloaded or image
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -230,9 +230,15 @@ fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
             model = GetLevelThumbnail(LevelID = knownLevel.level_id),
             contentDescription = "Thumbnail",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
+            onLoading = {imageLoading = true},
+            onError =  {imageLoading = false},
+            onSuccess =  {imageLoading = false}
         )
-
+        if(imageLoading){
+            preLoadedUI()
+            return //Dont load the text until the image has loaded as well
+        }
         GameLevelInfo(
             levelName = knownLevel.name,
             position = knownPos
@@ -247,6 +253,7 @@ fun UnknownRegion(
     unknownLevel: Level, uiUnknownPos: Int,
     onClick: () -> Unit
 ) {
+    var imageLoading by remember { mutableStateOf(false) } //Check if we need to load preloaded or image
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -256,21 +263,32 @@ fun UnknownRegion(
                 shape = RoundedCornerShape(size = 10.dp)
             )
             .clickable() {
-                onClick()
+                //Only allow input when images are done loading
+                if(!imageLoading){
+                    onClick()
+                }
             }
     ) {
+
         // Loading the background image
         AsyncImage(
             model = GetLevelThumbnail(LevelID = unknownLevel.level_id),
             contentDescription = "Thumbnail",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
+            onLoading = {imageLoading = true},
+            onError =  {imageLoading = false},
+            onSuccess =  {imageLoading = false}
         )
-
+        if(imageLoading){
+            preLoadedUI()
+            return
+        }
         GameLevelInfo(
             levelName = unknownLevel.name,
             position = uiUnknownPos
         )
+
     }
 }
 
