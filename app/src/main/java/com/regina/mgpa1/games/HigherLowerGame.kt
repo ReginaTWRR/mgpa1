@@ -8,7 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -45,12 +46,15 @@ import com.regina.mgpa1.sections.AppSection
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.R
+import com.regina.mgpa1.logic.BrushTitle
+import com.regina.mgpa1.logic.OutlinedHeadline
 import com.regina.mgpa1.logic.RenderMessage
+import com.regina.mgpa1.logic.StandardTitle
 import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
 
-//A class that implements the Higher Lower game
+// A class that implements the Higher Lower game
 class HigherLowerGame(
     val onGameExit: () -> Unit
 ) : AppSection(header = "Higher/Lower") {
@@ -58,18 +62,23 @@ class HigherLowerGame(
     override fun SectionLayout() {
         // Access the view model and get the 2 random levels
         val viewModel = viewModel<DemonListViewModel>()
-
         val levelList by viewModel.levelList.collectAsState()
-        val levels = listOf<Level?>(
-            levelList.randomOrNull(), levelList.randomOrNull()
-        )
 
-        var knownLevel by rememberSaveable() {
-            mutableStateOf(value = levels[0])
+        var knownLevel by rememberSaveable {
+            mutableStateOf<Level?>(value = null)
         }
-
-        var unknownLevel by rememberSaveable() {
-            mutableStateOf(value = levels[1])
+        var unknownLevel by rememberSaveable {
+            mutableStateOf<Level?>(value = null)
+        }
+        // LaunchedEffect: This block of code runs when levelList changes
+        // (i.e. Finishes loading)
+        LaunchedEffect(key1 = levelList) {
+            if (levelList.size >= 2) {
+                if (knownLevel == null || unknownLevel == null) {
+                    knownLevel = levelList.random()
+                    unknownLevel = levelList.random()
+                }
+            }
         }
 
         // Need val versions of the known and unknown levels to allow for smart-casting
@@ -99,7 +108,7 @@ class HigherLowerGame(
             mutableIntStateOf(value = -1)
         }
 
-        var streak by rememberSaveable() {
+        var streak by rememberSaveable {
             mutableIntStateOf(value = 0)
         }
 
@@ -109,12 +118,13 @@ class HigherLowerGame(
 
         // Used to overlay the ChoiceButtons over everything else
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
             //Base box
             Column(
                 modifier = Modifier.fillMaxSize()
-            ){
+            ) {
                 //Modifier Values(I placed box mod here cus the weight var is only accesible in the column)
                 val boxModifier: Modifier = Modifier
                     .weight(0.5f)
@@ -131,11 +141,11 @@ class HigherLowerGame(
                         .weight(0.08f)
                         .background(Color("#1f2154".toColorInt()))
                         .fillMaxWidth()
-                )
-                {
+                ) {
                     Text(
                         text = "Streak: $streak",
-                        fontSize = 30.sp
+                        fontSize = 30.sp,
+                        modifier = Modifier.padding(all = 10.dp)
                     )
                 }
 
@@ -154,6 +164,7 @@ class HigherLowerGame(
 
             if (shouldShowPanel) {
                 ChoicePanel(
+                    unknownLevel = currentUnknownLevel, knownLevel = currentKnownLevel,
                     onChoiceMade = { choice ->
                         val isChoiceCorrect = evaluateChoice(
                             choice, unknownPos, knownPos
@@ -162,7 +173,7 @@ class HigherLowerGame(
                         // Respond to the evaluation
                         if (isChoiceCorrect) {
                             // Reveal the position
-                            //UIUnknownPos = unknownPos
+                            // UIUnknownPos = unknownPos
 
                             // Go next round
                             knownLevel = unknownLevel
@@ -170,10 +181,9 @@ class HigherLowerGame(
 
                             // Increase streak
                             ++streak
-                        }
-                        else {
+                        } else {
                             // Reveal the position
-                            //UIUnknownPos = unknownPos
+                            // UIUnknownPos = unknownPos
 
                             // Reset streak
                             streak = 0
@@ -190,40 +200,40 @@ class HigherLowerGame(
     }
 }
 
-//An enum class that defines the choices a user can make
-enum class UserChoice() {
-    NONE, HIGHER, LOWER
+// An enum class that defines the choices a user can make
+enum class UserChoice {
+    HIGHER, LOWER
 }
 
 //==FUNCTIONS
 
-//A Composable function that renders the known region
+// A Composable function that renders the known region
 @Composable
-fun ColumnScope.KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-    ) {
-        // Loading the background image
-        AsyncImage(
-            model = GetLevelThumbnail(LevelID = knownLevel.level_id),
-            contentDescription = "Thumbnail",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
-        )
+fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
+   Box(
+       contentAlignment = Alignment.Center,
+       modifier = modifier
+   ) {
+       // Loading the background image
+       AsyncImage(
+           model = GetLevelThumbnail(LevelID = knownLevel.level_id),
+           contentDescription = "Thumbnail",
+           contentScale = ContentScale.Crop,
+           modifier = Modifier.matchParentSize()
+       )
 
-        LevelInfo(
-            levelName = knownLevel.name,
-            position = knownPos
-        )
-    }
+       LevelInfo(
+           levelName = knownLevel.name,
+           position = knownPos
+       )
+   }
 }
 
-//A Composable function that renders the unknown region
+// A Composable function that renders the unknown region
 @Composable
-fun ColumnScope.UnknownRegion(
+fun UnknownRegion(
     modifier: Modifier,
-    unknownLevel: Level, UIUnknownPos: Int,
+    unknownLevel: Level, uiUnknownPos: Int,
     onClick: () -> Unit
 ) {
     Box(
@@ -234,7 +244,7 @@ fun ColumnScope.UnknownRegion(
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(size = 10.dp)
             )
-            .clickable() {
+            .clickable{
                 onClick()
             }
     ) {
@@ -248,12 +258,12 @@ fun ColumnScope.UnknownRegion(
 
         LevelInfo(
             levelName = unknownLevel.name,
-            position = UIUnknownPos
+            position = uiUnknownPos
         )
     }
 }
 
-//A Composable function that renders level information
+// A Composable function that renders level information
 @Composable
 fun LevelInfo(levelName: String, position: Int) {
     val positionValue = if (position > 0) position.toString() else "???"
@@ -275,37 +285,87 @@ fun LevelInfo(levelName: String, position: Int) {
     )
 }
 
-//A Composable function that presents the user with higher / lower choice buttons
+// A Composable function that presents the user with higher / lower choice buttons
 @Composable
-fun ChoicePanel(onChoiceMade: (UserChoice) -> Unit) {
+fun ChoicePanel(
+    unknownLevel: Level, knownLevel: Level, onChoiceMade: (UserChoice) -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Higher button
-        ChoiceButton(
-            onButtonClick = {
-                onChoiceMade(UserChoice.HIGHER)
-            },
-            painterID = R.drawable.keyboard_arrow_up,
-            contentDescription = "Higher"
+        modifier = Modifier
+            .fillMaxSize(fraction = 0.75f)
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = RoundedCornerShape(size = 10.dp)
+            )
+            .background(color = MaterialTheme.colorScheme.background)
+       ) {
+        val unknownGradient = listOf(
+            MaterialTheme.colorScheme.onSecondary,
+            MaterialTheme.colorScheme.onBackground
         )
+        val knownGradient = listOf(Color.Gray, Color.White)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        // Question text
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f)
+        ) {
+            Row {
+                StandardTitle(text = "Is")
+                Spacer(modifier = Modifier.width(5.dp))
+                BrushTitle(text = unknownLevel.name, colors = unknownGradient)
+            }
+            Spacer(modifier = Modifier.height(5.dp))
 
-        // Lower button
-        ChoiceButton(
-            onButtonClick = {
-                onChoiceMade(UserChoice.LOWER)
-            },
-            painterID = R.drawable.keyboard_arrow_down,
-            contentDescription = "Lower"
-        )
+            OutlinedHeadline(
+                text = "HIGHER or LOWER",
+                outlinedColor = MaterialTheme.colorScheme.onSecondary,
+                fillColor = MaterialTheme.colorScheme.onBackground,
+                outlineWidth = 2.dp
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Row {
+                StandardTitle(text = "than")
+                Spacer(modifier = Modifier.width(5.dp))
+                BrushTitle(text = knownLevel.name, colors = knownGradient)
+                Spacer(modifier = Modifier.width(5.dp))
+                StandardTitle(text = "?")
+            }
+        }
+        // Buttons
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f)
+        ) {
+            // Higher button
+            ChoiceButton(
+                onButtonClick = {
+                    onChoiceMade(UserChoice.HIGHER)
+                },
+                painterID = R.drawable.keyboard_arrow_up,
+                contentDescription = "Higher"
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Lower button
+            ChoiceButton(
+                onButtonClick = {
+                    onChoiceMade(UserChoice.LOWER)
+                },
+                painterID = R.drawable.keyboard_arrow_down,
+                contentDescription = "Lower"
+            )
+        }
     }
 }
 
-//A Composable function that defines the appearance of a choice button
+// A Composable function that defines the appearance of a choice button
 @Composable
 fun ChoiceButton(
     onButtonClick: () -> Unit, @DrawableRes painterID: Int, contentDescription: String
@@ -334,14 +394,13 @@ fun ChoiceButton(
     }
 }
 
-//A function that evaluates whether the user's choice is correct
+// A function that evaluates whether the user's choice is correct
 fun evaluateChoice(
     choice: UserChoice, unknownPos: Int, knownPos: Int
 ): Boolean {
     // Note: We are evaluating RANKINGS. Higher pos = smaller int
     return when (choice) {
-        UserChoice.HIGHER -> (unknownPos < knownPos)
-        UserChoice.LOWER -> (unknownPos > knownPos)
-        else -> false
+        UserChoice.HIGHER-> (unknownPos < knownPos)
+        UserChoice.LOWER-> (unknownPos > knownPos)
     }
 }
