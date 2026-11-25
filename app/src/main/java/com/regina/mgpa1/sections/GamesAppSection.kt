@@ -20,12 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.regina.mgpa1.games.HigherLowerGame
+import com.regina.mgpa1.games.higherLower.LostHigherLowerGame
+import com.regina.mgpa1.games.higherLower.MainHigherLowerGame
 
 //==CLASSES
 
-//A class that implements the Games section of the App. Designed with the
-//consideration of adding more games in the future, though there is currently only one.
+// A class that implements the Games section of the App. Designed with the
+// consideration of adding more games in the future, though there is currently only one.
 class GamesAppSection : AppSection(header = "Games") {
     @Composable
     override fun SectionLayout() {
@@ -45,25 +46,34 @@ class GamesAppSection : AppSection(header = "Games") {
             currentPage = overviewPage
         }
 
-        // Define all games
+        // Define all games and their pages
+        val lostHigherLower = GamesPage(
+            code = PageCode.LOSTHIGHERLOWER,
+            content = {
+                LostHigherLowerGame().SectionLayout()
+            }
+        )
+
+        val mainHigherLower = GamesPage(
+            code = PageCode.MAINHIGHERLOWER,
+            content = {
+                MainHigherLowerGame(
+                    onGameExit = {
+                        currentPage = lostHigherLower
+                    },
+                    returnOverviewPage = returnOverviewPage
+                ).SectionLayout()
+            }
+        )
+
+        val gameHigherOrLower = Game(
+            name = "HIGHER OR LOWER",
+            mainPage = mainHigherLower,
+            lostPage = lostHigherLower
+        )
+
         val games by remember {
-            mutableStateOf(value = listOf(
-                // Higher or lower
-                Game(
-                    name = "HIGHER OR LOWER",
-                    page = GamesPage(
-                        code = PageCode.HIGHERLOWER,
-                        content = {
-                            GameHigherLower(
-                                onGameExit = {
-                                    currentPage = overviewPage
-                                },
-                                returnOverviewPage = returnOverviewPage
-                            )
-                        }
-                    )
-                )
-            ))
+            mutableStateOf(value = listOf(gameHigherOrLower))
         }
 
         // Define the overview page
@@ -73,7 +83,7 @@ class GamesAppSection : AppSection(header = "Games") {
                 GameOverview(
                     header, games,
                     onGameClick = { game ->
-                        currentPage = game.page
+                        currentPage = game.mainPage
                     }
                 )
             }
@@ -86,32 +96,33 @@ class GamesAppSection : AppSection(header = "Games") {
 
         // Store local reference to currentPage (Else smart cast doesn't work)
         val page = currentPage
-
         page ?: return
+
         page.content()
     }
 }
 
-//A data class that defines a games page
+// A data class that defines a games page
 data class GamesPage(
     val code: PageCode,
     val content: @Composable () -> Unit
 )
 
-//A data class that defines a game
+// A data class that defines a game
 data class Game(
     val name: String,
-    val page: GamesPage
+    val mainPage: GamesPage,
+    val lostPage: GamesPage
 )
 
-//An enum class that stores a code for each page, used to reliably identify a page
+// An enum class that stores a code for each page, used to reliably identify a page
 enum class PageCode {
-    OVERVIEW, HIGHERLOWER
+    OVERVIEW, MAINHIGHERLOWER, LOSTHIGHERLOWER
 }
 
 //==FUNCTIONS
 
-//A Composable function that renders the game overview
+// A Composable function that renders the game overview
 @Composable
 fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit) {
     // Biggest rendering body
@@ -129,7 +140,6 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
                 style = MaterialTheme.typography.titleLarge
             )
         }
-
         Spacer(modifier = Modifier.height(10.dp))
 
         // Render the game cards
@@ -144,23 +154,13 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
                         onGameClick(game)
                     }
                 )
-
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
 }
 
-//A Composable function that renders the higher lower game
-@Composable
-fun GameHigherLower(
-    onGameExit: () -> Unit,
-    returnOverviewPage: () -> Unit
-) {
-    HigherLowerGame(onGameExit, returnOverviewPage).SectionLayout()
-}
-
-//A Composable function that defines a game card's appearance and function
+// A Composable function that defines a game card's appearance and function
 @Composable
 fun GameCard(gameName: String, onClick: () -> Unit) {
     OutlinedButton(

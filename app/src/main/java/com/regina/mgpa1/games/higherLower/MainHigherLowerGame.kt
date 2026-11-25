@@ -1,4 +1,4 @@
-package com.regina.mgpa1.games
+package com.regina.mgpa1.games.higherLower
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -61,11 +60,11 @@ import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
 
-// A class that implements the Higher Lower game
-class HigherLowerGame(
+// A class that implements the main Higher Lower game
+class MainHigherLowerGame (
     val onGameExit: () -> Unit,
     val returnOverviewPage: () -> Unit
-) : AppSection(header = "Higher/Lower") {
+) : AppSection(header = "Main Higher/Lower") {
     @Composable
     override fun SectionLayout() {
         BackHandler {
@@ -206,9 +205,6 @@ class HigherLowerGame(
 
                         // Respond to the evaluation
                         if (isChoiceCorrect) {
-                            // Reveal the position
-                            // UIUnknownPos = unknownPos
-
                             // Go next round
                             knownLevel = unknownLevel
                             unknownLevel = levelList.randomOrNull()
@@ -216,13 +212,10 @@ class HigherLowerGame(
                             // Increase streak
                             ++streak
                         } else {
-                            // Reveal the position
-                            // UIUnknownPos = unknownPos
-
                             // Reset streak
                             streak = 0
 
-                            // Go back to the overview page
+                            // Go back to the game lost page
                             onGameExit()
                         }
                     }
