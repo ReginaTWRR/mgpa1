@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
@@ -349,7 +351,7 @@ fun ChoicePanel(
                 shape = RoundedCornerShape(size = 10.dp)
             )
             .background(color = MaterialTheme.colorScheme.background)
-       ) {
+    ) {
         val unknownGradient = listOf(
             MaterialTheme.colorScheme.onSecondary,
             MaterialTheme.colorScheme.onBackground
@@ -360,36 +362,55 @@ fun ChoicePanel(
             onChoiceMade(UserChoice.NONE)
         }
 
-        // Question text
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Box(
             modifier = Modifier.weight(1f)
         ) {
-            FlowRow {
-                StandardTitle(text = "Is")
-                Spacer(modifier = Modifier.width(5.dp))
-                BrushTitle(text = unknownLevel.name, colors = unknownGradient)
+            // Exit button
+            IconButton(
+                onClick = {
+                    onChoiceMade(UserChoice.NONE)
+                },
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.close),
+                    contentDescription = "Close Button"
+                )
             }
-            Spacer(modifier = Modifier.height(5.dp))
 
-            OutlinedHeadline(
-                text = "HIGHER or LOWER",
-                outlinedColor = MaterialTheme.colorScheme.onSecondary,
-                fillColor = MaterialTheme.colorScheme.onBackground,
-                outlineWidth = 2.dp
-            )
-            Spacer(modifier = Modifier.height(5.dp))
+            // Question text
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                FlowRow {
+                    StandardTitle(text = "Is")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    BrushTitle(text = unknownLevel.name, colors = unknownGradient)
+                }
+                Spacer(modifier = Modifier.height(5.dp))
 
-            FlowRow {
-                StandardTitle(text = "than")
-                Spacer(modifier = Modifier.width(5.dp))
-                BrushTitle(text = knownLevel.name, colors = knownGradient)
-                StandardTitle(text = "?")
+                OutlinedHeadline(
+                    text = "HIGHER or LOWER",
+                    outlinedColor = MaterialTheme.colorScheme.onSecondary,
+                    fillColor = MaterialTheme.colorScheme.onBackground,
+                    outlineWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                FlowRow {
+                    StandardTitle(text = "than")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    BrushTitle(text = knownLevel.name, colors = knownGradient)
+                    StandardTitle(text = "?")
+                }
             }
         }
 
-        // Buttons
+        // Choice buttons
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
