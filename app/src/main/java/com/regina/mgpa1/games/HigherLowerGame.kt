@@ -9,12 +9,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,7 +66,7 @@ class HigherLowerGame(
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
-        BackHandler() {
+        BackHandler {
             // Go back to the Games section
             returnOverviewPage()
         }
@@ -73,16 +74,18 @@ class HigherLowerGame(
         val viewModel = viewModel<DemonListViewModel>()
         val levelList by viewModel.levelList.collectAsState()
 
-        if(levelList.isEmpty())
-            return
-        val ErrorLevel = levelList[0]
-        if(ErrorLevel.id.equals("-1")){
+        if(levelList.isEmpty()) return
+
+        val errorLevel = levelList[0]
+
+        if(errorLevel.id == "-1") {
             //Center both button and Error UI.
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                ErrorHandler(ErrorLevel)
+                ErrorHandler(errorLevel)
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(onClick = returnOverviewPage) { Text("return to Games Page") }
             }
+
             return
         }
 
@@ -191,6 +194,10 @@ class HigherLowerGame(
                 ChoicePanel(
                     unknownLevel = currentUnknownLevel, knownLevel = currentKnownLevel,
                     onChoiceMade = { choice ->
+                        shouldShowPanel = false
+
+                        if (choice == UserChoice.NONE) return@ChoicePanel
+
                         val isChoiceCorrect = evaluateChoice(
                             choice, unknownPos, knownPos
                         )
@@ -216,8 +223,6 @@ class HigherLowerGame(
                             // Go back to the overview page
                             onGameExit()
                         }
-
-                        shouldShowPanel = false
                     }
                 )
             }
@@ -227,7 +232,7 @@ class HigherLowerGame(
 
 // An enum class that defines the choices a user can make
 enum class UserChoice {
-    HIGHER, LOWER
+    NONE, HIGHER, LOWER
 }
 
 //==FUNCTIONS
@@ -278,7 +283,7 @@ fun UnknownRegion(
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(size = 10.dp)
             )
-            .clickable() {
+            .clickable {
                 //Only allow input when images are done loading
                 if(!imageLoading){
                     onClick()
@@ -351,13 +356,17 @@ fun ChoicePanel(
         )
         val knownGradient = listOf(Color.Gray, Color.White)
 
+        BackHandler {
+            onChoiceMade(UserChoice.NONE)
+        }
+
         // Question text
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.weight(1f)
         ) {
-            Row {
+            FlowRow {
                 StandardTitle(text = "Is")
                 Spacer(modifier = Modifier.width(5.dp))
                 BrushTitle(text = unknownLevel.name, colors = unknownGradient)
@@ -372,14 +381,14 @@ fun ChoicePanel(
             )
             Spacer(modifier = Modifier.height(5.dp))
 
-            Row {
+            FlowRow {
                 StandardTitle(text = "than")
                 Spacer(modifier = Modifier.width(5.dp))
                 BrushTitle(text = knownLevel.name, colors = knownGradient)
-                Spacer(modifier = Modifier.width(5.dp))
                 StandardTitle(text = "?")
             }
         }
+
         // Buttons
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -425,9 +434,7 @@ fun ChoiceButton(
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
-        modifier = Modifier
-            .width(100.dp)
-            .height(100.dp)
+        modifier = Modifier.size(112.5.dp)
     ) {
         Icon(
             painter = painterResource(id = painterID),
@@ -445,5 +452,6 @@ fun evaluateChoice(
     return when (choice) {
         UserChoice.HIGHER -> (unknownPos < knownPos)
         UserChoice.LOWER -> (unknownPos > knownPos)
+        else -> false
     }
 }
