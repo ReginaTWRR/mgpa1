@@ -132,19 +132,13 @@ fun RenderLevelList(levels: List<Level>) {
             .fillMaxSize()
             .border(width = 1.dp, color = MaterialTheme.colorScheme.onBackground)
     ) {
-        //Hi!!! So, for now i made this into a lazy column and it just loads in a text. I
-        //tried my best to optimise loading the list. Just saying, theres about 1k+ levels.
-        //There are 2 options. A: Limit the list. B: Optimise the loading (somehow). C:Load once,
-        //Store the info in memory(possible sideffects). You can try to explore your own solutions so yea
-        //Good luck
         items(
             items = levels,
             key = { level -> level.id }
         ) { level ->
             if(level.position == 1){
                 if(!initialised){
-                    initialised = true
-                    println("WE CAN OVERCOME THEIR POWER~~~")
+                    initialised = true;
                    level.expanded = true
                 }
             }
