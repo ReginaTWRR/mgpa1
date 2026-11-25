@@ -1,13 +1,30 @@
 package com.regina.mgpa1.logic
 
+import androidx.compose.runtime.Composable
+import com.regina.mgpa1.ErrorUIs.E400UI
+import com.regina.mgpa1.ErrorUIs.E404UI
+import com.regina.mgpa1.ErrorUIs.E408UI
+import com.regina.mgpa1.ErrorUIs.E410UI
+import com.regina.mgpa1.ErrorUIs.E423UI
+import com.regina.mgpa1.ErrorUIs.E429UI
+import com.regina.mgpa1.ErrorUIs.E500UI
+import com.regina.mgpa1.ErrorUIs.E502UI
+import com.regina.mgpa1.ErrorUIs.E504UI
+import com.regina.mgpa1.ErrorUIs.E511UI
+import com.regina.mgpa1.ErrorUIs.E600UI
+import com.regina.mgpa1.ErrorUIs.EDefaulUI
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 //==Default Variables
 val aredlEndPoint = "https://api.aredl.net/v2" //Link to the aredl api. Concat the function GET in to this and pass it in the func
+//val aredlEndPoint = "https://q6ckqq.mockapi.dog" //Link to the aredl api. Concat the function GET in to this and pass it in the func
 
 //This is a data class meant for this file.
 data class APIResponse(
@@ -48,7 +65,25 @@ suspend fun getfromAPI(inputString : String): APIResponse{
             }
         }
         catch (e: IOException){
-            println("Reading Error:${e.message}. Cause: ${e.cause}")
+            when(e){
+                is UnknownHostException -> {
+                    response.responseCode = 600
+                    response.content = "No internet connection or DNS lookup failed"
+                }
+                is SocketTimeoutException -> {
+                    response.responseCode = 600
+                    response.content = "Connection Time out."
+                }
+                is ConnectException -> {
+                    response.responseCode = 600
+                    response.content = "Connection Refusal."
+                }
+                else -> {
+                    println("code${response.responseCode}")
+                    println("Reading Error:${e.message}. Cause: ${e.cause}")
+                }
+            }
+
         }
         finally {
             disconnect()
@@ -61,17 +96,53 @@ suspend fun getfromAPI(inputString : String): APIResponse{
 //==JSON Parsers
 
 suspend fun GetLevelList():List<Level>{
-//    val scope = CoroutineScope(Dispatchers.Default)
+//   val scope = CoroutineScope(Dispatchers.Default)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels")}
-    val results = Json.decodeFromString<List<Level>>(response.content)
+    var results:List<Level>
+
+    if(response.responseCode in 200..300){
+        results =  Json.decodeFromString<List<Level>>(response.content)
+    }
+    else{
+        val errorLevel = Level("-1","Error",response.responseCode,response.content,0, STATUS.Removed,false,0,false,listOf(null),null,null,null,false,null,null,null)
+        results = listOf(errorLevel)
+    }
 
     return results
 }
 
 suspend fun GetLevelDetails(LevelID : Int): LevelDetails{
-//    val scope = CoroutineScope(Dispatchers.IO)
     val response = withContext(Dispatchers.IO){getfromAPI("/api/aredl/levels/$LevelID")}
-    val results = Json.decodeFromString<LevelDetails>(response.content)
+    val results : LevelDetails;
+
+    if(response.responseCode in 200..300){
+        results = Json.decodeFromString<LevelDetails>(response.content)
+    }
+    else{
+        //Position is response code
+        //Name is response content
+        results = LevelDetails("-1",response.content,response.responseCode,0, STATUS.Removed,false,0,false,listOf(null),null,null,null,false,null,null,
+            User("Error","Error","Error"),listOf())
+    }
+
+    return results
+}
+
+// A function to get the creators of a level
+suspend fun GetLevelCreators(LevelID: Int): List<Creator> {
+    val response = withContext(Dispatchers.IO) {
+        getfromAPI(inputString = "/api/aredl/levels/$LevelID/creators")
+    }
+    val results: List<Creator>
+
+    if (response.responseCode in 200..300) {
+        results = Json.decodeFromString<List<Creator>>(response.content)
+    } else {
+        results = listOf(
+            Creator(id = "-1", username = "Error", global_name = "Error")
+        )
+    }
+
     return results
 }
 
@@ -115,3 +186,34 @@ fun GetLevelThumbnail(LevelID : Int) : String{
     return "https://raw.githubusercontent.com/All-Rated-Extreme-Demon-List/Thumbnails/main/levels/full/$LevelID.webp"
 }
 
+//This function finds out which error code is what and calls the appropriate UI
+@Composable
+fun ErrorHandler(ErrorLevel:Level){
+    val ErrorCode = ErrorLevel.position
+    val ErrorMessage = ErrorLevel.publisher_id
+    errorCase(ErrorCode,ErrorMessage)
+}
+//Overload to use details instead
+@Composable
+fun ErrorHandler(ErrorDetails: LevelDetails){
+    errorCase(ErrorDetails.position,ErrorDetails.name)
+}
+
+@Composable
+private fun errorCase(ErrorCode:Int?,ErrorMessage: String){
+    //Switch case
+    when(ErrorCode){
+        400-> E400UI().ErrorLayout(ErrorCode,ErrorMessage)
+        404-> E404UI().ErrorLayout(ErrorCode,ErrorMessage)
+        408-> E408UI().ErrorLayout(ErrorCode,ErrorMessage)
+        410-> E410UI().ErrorLayout(ErrorCode,ErrorMessage)
+        423-> E423UI().ErrorLayout(ErrorCode, ErrorMessage)
+        429-> E429UI().ErrorLayout(ErrorCode, ErrorMessage)
+        500-> E500UI().ErrorLayout(ErrorCode, ErrorMessage)
+        502-> E502UI().ErrorLayout(ErrorCode, ErrorMessage)
+        504-> E504UI().ErrorLayout(ErrorCode, ErrorMessage)
+        511-> E511UI().ErrorLayout(ErrorCode,ErrorMessage)
+        600-> E600UI().ErrorLayout(ErrorCode,ErrorMessage)
+        else -> EDefaulUI().ErrorLayout(ErrorCode,ErrorMessage)
+    }
+}

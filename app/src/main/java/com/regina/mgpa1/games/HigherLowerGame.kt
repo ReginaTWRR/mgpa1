@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.regina.mgpa1.ErrorUIs.preLoadedUI
 import com.regina.mgpa1.sections.AppSection
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.logic.Level
@@ -51,6 +53,7 @@ import com.regina.mgpa1.logic.BrushTitle
 import com.regina.mgpa1.logic.OutlinedHeadline
 import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.logic.StandardTitle
+import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.viewModels.DemonListViewModel
 
 //==CLASSES
@@ -62,9 +65,26 @@ class HigherLowerGame(
 ) : AppSection(header = "Higher/Lower") {
     @Composable
     override fun SectionLayout() {
+        BackHandler() {
+            // Go back to the Games section
+            returnOverviewPage()
+        }
         // Access the view model and get the 2 random levels
         val viewModel = viewModel<DemonListViewModel>()
         val levelList by viewModel.levelList.collectAsState()
+
+        if(levelList.isEmpty())
+            return
+        val ErrorLevel = levelList[0]
+        if(ErrorLevel.id.equals("-1")){
+            //Center both button and Error UI.
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                ErrorHandler(ErrorLevel)
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(onClick = returnOverviewPage) { Text("return to Games Page") }
+            }
+            return
+        }
 
         var knownLevel by rememberSaveable {
             mutableStateOf<Level?>(value = null)
@@ -89,10 +109,7 @@ class HigherLowerGame(
         val currentUnknownLevel = unknownLevel
 
         if (currentKnownLevel == null || currentUnknownLevel == null) {
-            RenderMessage(
-                text = "Loading levels...",
-                modifier = Modifier.fillMaxWidth()
-            )
+            preLoadedUI()
             return
         }
 
@@ -218,23 +235,31 @@ enum class UserChoice {
 // A Composable function that renders the known region
 @Composable
 fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
-   Box(
-       contentAlignment = Alignment.Center,
-       modifier = modifier
-   ) {
-       // Loading the background image
-       AsyncImage(
-           model = GetLevelThumbnail(LevelID = knownLevel.level_id),
-           contentDescription = "Thumbnail",
-           contentScale = ContentScale.Crop,
-           modifier = Modifier.matchParentSize()
-       )
+    var imageLoading by remember { mutableStateOf(false) } //Check if we need to load preloaded or image
 
-       LevelInfo(
-           levelName = knownLevel.name,
-           position = knownPos
-       )
-   }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        // Loading the background image - Shld place error images here
+        AsyncImage(
+            model = GetLevelThumbnail(LevelID = knownLevel.level_id),
+            contentDescription = "Thumbnail",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize(),
+            onLoading = {imageLoading = true},
+            onError =  {imageLoading = false},
+            onSuccess =  {imageLoading = false}
+        )
+        if(imageLoading){
+            preLoadedUI()
+            return //Dont load the text until the image has loaded as well
+        }
+        GameLevelInfo(
+            levelName = knownLevel.name,
+            position = knownPos
+        )
+    }
 }
 
 // A Composable function that renders the unknown region
@@ -244,6 +269,7 @@ fun UnknownRegion(
     unknownLevel: Level, uiUnknownPos: Int,
     onClick: () -> Unit
 ) {
+    var imageLoading by remember { mutableStateOf(false) } //Check if we need to load preloaded or image
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -252,8 +278,11 @@ fun UnknownRegion(
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(size = 10.dp)
             )
-            .clickable{
-                onClick()
+            .clickable() {
+                //Only allow input when images are done loading
+                if(!imageLoading){
+                    onClick()
+                }
             }
     ) {
         // Loading the background image
@@ -261,10 +290,16 @@ fun UnknownRegion(
             model = GetLevelThumbnail(LevelID = unknownLevel.level_id),
             contentDescription = "Thumbnail",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
+            onLoading = {imageLoading = true},
+            onError =  {imageLoading = false},
+            onSuccess =  {imageLoading = false}
         )
-
-        LevelInfo(
+        if(imageLoading){
+            preLoadedUI()
+            return
+        }
+        GameLevelInfo(
             levelName = unknownLevel.name,
             position = uiUnknownPos
         )
@@ -273,7 +308,7 @@ fun UnknownRegion(
 
 // A Composable function that renders level information
 @Composable
-fun LevelInfo(levelName: String, position: Int) {
+fun GameLevelInfo(levelName: String, position: Int) {
     val positionValue = if (position > 0) position.toString() else "???"
 
     Text(
@@ -408,7 +443,7 @@ fun evaluateChoice(
 ): Boolean {
     // Note: We are evaluating RANKINGS. Higher pos = smaller int
     return when (choice) {
-        UserChoice.HIGHER-> (unknownPos < knownPos)
-        UserChoice.LOWER-> (unknownPos > knownPos)
+        UserChoice.HIGHER -> (unknownPos < knownPos)
+        UserChoice.LOWER -> (unknownPos > knownPos)
     }
 }

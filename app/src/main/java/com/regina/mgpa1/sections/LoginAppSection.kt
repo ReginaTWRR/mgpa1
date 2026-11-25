@@ -1,12 +1,19 @@
 package com.regina.mgpa1.sections
 
+import android.graphics.Paint
+import androidx.annotation.ColorInt
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -15,13 +22,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.regina.mgpa1.ErrorUIs.preLoadedUI
+import com.regina.mgpa1.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlin.time.Duration.Companion.seconds
 
 //==CLASSES
 
@@ -29,7 +47,7 @@ import androidx.compose.ui.unit.dp
 class LoginAppSection : AppSection(header = "Login") {
     //Basically, mutableStateOf creates a observable value that calls a recompose when it is updated
     var loggedIn: Boolean by mutableStateOf(false)
-
+    var Displayemail:String = "";
     @Composable
     override fun SectionLayout() {
         if(loggedIn){
@@ -40,7 +58,6 @@ class LoginAppSection : AppSection(header = "Login") {
         }
     }
 
-    @Preview
     @Composable
     fun loginPage() {
         //Input Field Variables
@@ -93,7 +110,8 @@ class LoginAppSection : AppSection(header = "Login") {
                 Button(
                     onClick = {
                         // TODO: add refresh animation here
-                        if(email.isNotEmpty() && password.isNotEmpty()){
+                        if(Emailerror == null && Passworderror == null){
+                            Displayemail = email;
                             loggedIn = true
                         }
                     }
@@ -104,15 +122,29 @@ class LoginAppSection : AppSection(header = "Login") {
         }
     }
 
+    @Preview
     @Composable
     fun UserPage(){
-        //Temp UI
-        Button(
-            onClick = {
-                loggedIn = false
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(Modifier.height(100.dp))
+            Image(
+                painter = painterResource(R.drawable.defaultprofile), contentDescription = "Default profile picture",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.clip(CircleShape).border(2.dp,MaterialTheme.colorScheme.onBackground,CircleShape)
+            )
+            Spacer(Modifier.height(50.dp))
+            Text(text = "Username",color = MaterialTheme.colorScheme.onBackground, fontSize = 30.sp)
+            Text(text = "$Displayemail",color = MaterialTheme.colorScheme.onBackground, fontSize = 30.sp)
+            Spacer(Modifier.height(50.dp))
+            //Temp UI
+            Button(
+                onClick = {
+                    loggedIn = false
+                }
+            ){
+                Text(text = "SignOut")
             }
-        ){
-            Text(text = "SignOut")
         }
+
     }
 }

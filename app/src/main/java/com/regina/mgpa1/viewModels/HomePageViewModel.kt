@@ -20,6 +20,12 @@ class HomePageViewModel(
 
     init {
         // Watch the level list and get the random level once it has loaded
+        GetRandomDemon()
+    }
+
+    //Function to refresh the Generated Demon
+    fun GetRandomDemon(){
+        // Watch the level list and get the random level once it has loaded
         viewModelScope.launch {
             listViewModel.levelList.collect { levelList ->
                 if (_generatedDemon.value == null && levelList.isNotEmpty()) {

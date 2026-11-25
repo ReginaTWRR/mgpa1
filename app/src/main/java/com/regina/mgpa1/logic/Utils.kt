@@ -21,10 +21,10 @@ interface Searchable {
 
 // A Composable function to render a level's name and position
 @Composable
-fun LevelName(level: Level, modifier: Modifier
-) {
+fun LevelName(level: Level, textColor: Color, modifier: Modifier) {
     Text(
         text = "#${level.position} - ${level.name}",
+        color = textColor,
         modifier = modifier
     )
 }

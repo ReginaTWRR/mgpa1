@@ -35,7 +35,7 @@ class GamesAppSection : AppSection(header = "Games") {
             mutableStateOf<GamesPage?>(value = null)
         }
 
-        // Same; need to declare overviewPage first, dependency in higher lower game.
+        // Same, need to declare overviewPage first, dependency in higher lower game.
         var overviewPage by remember {
             mutableStateOf<GamesPage?>(value = null)
         }
@@ -137,9 +137,7 @@ fun GameOverview(header: String, games: List<Game>, onGameClick: (Game) -> Unit)
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            items(
-                items = games
-            ) { game ->
+            items(items = games) { game ->
                 GameCard(
                     gameName = game.name,
                     onClick = {

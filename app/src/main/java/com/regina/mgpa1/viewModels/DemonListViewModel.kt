@@ -22,7 +22,10 @@ class DemonListViewModel : ViewModel() {
     init {
         getLevelList()
     }
-
+    //This methods calls getLevelList again. Use responsibly
+    fun refreshLevelList(){
+        getLevelList()
+    }
     private fun getLevelList() {
         viewModelScope.launch {
             // Get the list of all levels using the API layer's GetLevelList() function

@@ -43,7 +43,8 @@ data class Level(
     val is_edel_pending : Boolean,
     val gddl_tier: Float ?= null,
     val nlw_tier: String ?= null,
-    val completed_by_user: Boolean ?= null
+    val completed_by_user: Boolean ?= null,
+    var expanded: Boolean = false
 ) : Parcelable, Searchable {
     override fun doesMatchSearchQuery(query: String): Boolean {
         // Check if the query is blank
@@ -109,3 +110,12 @@ data class LevelDetails(
     val publisher: User,
     val verifications:List<Verification>
 )
+
+// List all creators
+@Serializable
+data class Creator (
+    val id : String,
+    val username : String,
+    val global_name: String
+) {
+}
