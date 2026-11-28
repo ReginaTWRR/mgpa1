@@ -4,17 +4,22 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.regina.mgpa1.sections.AppSection
+import com.regina.mgpa1.viewModels.HigherLowerViewModel
 
 //==CLASSES
 
@@ -22,25 +27,35 @@ import com.regina.mgpa1.sections.AppSection
 class LostHigherLowerGame : AppSection(header = "Lost Higher/Lower") {
     @Composable
     override fun SectionLayout() {
+        val viewModel = viewModel<HigherLowerViewModel>()
+        val streak = viewModel.streak.collectAsState().value
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    shape = RoundedCornerShape(size = 10.dp)
+                )
         ) {
             Text(
                 text = "Game Over",
-                style = MaterialTheme.typography.displayLarge
+                style = MaterialTheme.typography.headlineLarge
             )
             Spacer(modifier = Modifier.height(10.dp))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(size = 10.dp)
-                )
+                modifier = Modifier
+                    .padding(horizontal = 100.dp)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = RoundedCornerShape(size = 10.dp)
+                    )
             ) {
                 Text(
                     text = "FINAL STREAK",
@@ -48,7 +63,53 @@ class LostHigherLowerGame : AppSection(header = "Lost Higher/Lower") {
                     modifier = Modifier.padding(all = 10.dp)
                 )
                 Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = "$streak",
+                    style = MaterialTheme.typography.displayLarge,
+                    modifier = Modifier.padding(all = 10.dp)
+                )
             }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    onClick = {
+
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSecondary,
+                        contentColor = MaterialTheme.colorScheme.inverseSurface
+                    ),
+                    modifier = Modifier.width(200.dp)
+                ) {
+                    Text(
+                        text = "Play Again",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Button(
+                    onClick = {
+
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.inverseSurface,
+                        contentColor = MaterialTheme.colorScheme.background
+                    ),
+                    modifier = Modifier.width(200.dp)
+                ) {
+                    Text(
+                        text = "Return to Menu",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

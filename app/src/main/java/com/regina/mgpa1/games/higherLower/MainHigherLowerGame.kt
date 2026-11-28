@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.ErrorUIs.preLoadedUI
@@ -57,6 +58,7 @@ import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.logic.StandardTitle
 import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.viewModels.DemonListViewModel
+import com.regina.mgpa1.viewModels.HigherLowerViewModel
 
 //==CLASSES
 
@@ -71,9 +73,15 @@ class MainHigherLowerGame (
             // Go back to the Games section
             returnOverviewPage()
         }
-        // Access the view model and get the 2 random levels
-        val viewModel = viewModel<DemonListViewModel>()
-        val levelList by viewModel.levelList.collectAsState()
+
+        // Access the game view model
+        val gameViewModel = viewModel<HigherLowerViewModel>()
+
+        val streak = gameViewModel.streak.collectAsState().value
+
+        // Access the list view model and get the 2 random levels
+        val listViewModel = viewModel<DemonListViewModel>()
+        val levelList by listViewModel.levelList.collectAsState()
 
         if(levelList.isEmpty()) return
 
@@ -132,10 +140,6 @@ class MainHigherLowerGame (
             mutableIntStateOf(value = -1)
         }
 
-        var streak by rememberSaveable {
-            mutableIntStateOf(value = 0)
-        }
-
         var shouldShowPanel by remember {
             mutableStateOf(value = false)
         }
@@ -167,13 +171,12 @@ class MainHigherLowerGame (
                 //Stat tracker region
                 Box(
                     modifier = Modifier
-                        .weight(0.08f)
                         .background(Color("#1f2154".toColorInt()))
                         .fillMaxWidth()
                 ) {
                     Text(
                         text = "Streak: $streak",
-                        fontSize = 30.sp,
+                        style = MaterialTheme.typography.headlineLarge,
                         modifier = Modifier.padding(all = 10.dp)
                     )
                 }
@@ -210,10 +213,10 @@ class MainHigherLowerGame (
                             unknownLevel = levelList.randomOrNull()
 
                             // Increase streak
-                            ++streak
+                            gameViewModel.onStreakIncreased()
                         } else {
                             // Reset streak
-                            streak = 0
+                            gameViewModel.onStreakReset()
 
                             // Go back to the game lost page
                             onGameExit()
@@ -349,7 +352,10 @@ fun ChoicePanel(
             MaterialTheme.colorScheme.onSecondary,
             MaterialTheme.colorScheme.onBackground
         )
-        val knownGradient = listOf(Color.Gray, Color.White)
+        val knownGradient = listOf(
+            Color.Gray,
+            MaterialTheme.colorScheme.inverseSurface
+        )
 
         BackHandler {
             onChoiceMade(UserChoice.NONE)
