@@ -1,5 +1,6 @@
 package com.regina.mgpa1.sections
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,10 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.regina.mgpa1.ErrorUIs.preLoadedUI
 import com.regina.mgpa1.games.higherLower.MainHigherLowerGame
 import com.regina.mgpa1.viewModels.Game
 import com.regina.mgpa1.viewModels.GamesSectionViewModel
 import com.regina.mgpa1.viewModels.GamesPage
+import com.regina.mgpa1.viewModels.HigherLowerViewModel
 import com.regina.mgpa1.viewModels.PageCode
 
 //==CLASSES
@@ -35,8 +38,11 @@ import com.regina.mgpa1.viewModels.PageCode
 class GamesAppSection : AppSection(header = "Games") {
     @Composable
     override fun SectionLayout() {
-        val viewModel = viewModel<GamesSectionViewModel>()
-        val currentPage = viewModel.currentPage.collectAsState().value
+        val gamesViewModel = viewModel<GamesSectionViewModel>()
+        val currentPage = gamesViewModel.currentPage.collectAsState().value
+
+        val hlViewModel = viewModel<HigherLowerViewModel>()
+        val higherLowerGame = hlViewModel.game.collectAsState().value
 
         // Need to declare overviewPage first. Dependency in higher lower game
         var overviewPage by remember {
@@ -48,27 +54,20 @@ class GamesAppSection : AppSection(header = "Games") {
             val newPage = overviewPage
 
             if (newPage != null) {
-                viewModel.onPageChanged(newPage = newPage)
+                gamesViewModel.onPageChanged(newPage = newPage)
             }
         }
 
         // Define all games and their pages
-        val higherLower = GamesPage(
-            code = PageCode.HIGHERLOWER,
-            content = {
-                MainHigherLowerGame(
-                    returnOverviewPage = returnOverviewPage
-                ).SectionLayout()
-            }
-        )
+        hlViewModel.initGame(returnOverviewPage)
 
-        val gameHigherLower = Game(
-            name = "HIGHER OR LOWER",
-            page = higherLower
-        )
+        if (higherLowerGame == null) {
+            preLoadedUI()
+            return
+        }
 
         val games by remember {
-            mutableStateOf(value = listOf(gameHigherLower))
+            mutableStateOf(value = listOf(higherLowerGame))
         }
 
         // Define the overview page
@@ -78,7 +77,8 @@ class GamesAppSection : AppSection(header = "Games") {
                 GameOverview(
                     header, games,
                     onGameClick = { game ->
-                        viewModel.onPageChanged(newPage = game.page)
+                        gamesViewModel.onPageChanged(newPage = game.page)
+                        game.onEnter()
                     }
                 )
             }
@@ -86,18 +86,16 @@ class GamesAppSection : AppSection(header = "Games") {
 
         // If page is null, "initialise" it to overviewPage.
         if (currentPage == null) {
-            val newPage = overviewPage
-
-            if (newPage != null) {
-                viewModel.onPageChanged(newPage = newPage)
+            overviewPage?.let{
+                gamesViewModel.onPageChanged(newPage = it)
             }
         }
 
-        // Store local reference to currentPage (Else smart cast doesn't work)
-        val page = currentPage
-        page ?: return
-
-        page.content()
+        Crossfade(
+            targetState = currentPage
+        ) { screen ->
+            screen?.content()
+        }
     }
 }
 

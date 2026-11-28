@@ -2,13 +2,18 @@ package com.regina.mgpa1.viewModels
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
+import com.regina.mgpa1.games.higherLower.MainHigherLowerGame
+import com.regina.mgpa1.logic.Playable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 //==CLASSES
 
 // A class that stores data related to the Higher Lower game
-class HigherLowerViewModel : ViewModel() {
+class HigherLowerViewModel : ViewModel(), Playable {
+    private val _game = MutableStateFlow<Game?>(value = null)
+    val game = _game.asStateFlow()
+
     private val _currentPage = MutableStateFlow<HigherLowerPage?>(value = null)
     val currentPage = _currentPage.asStateFlow()
 
@@ -19,6 +24,32 @@ class HigherLowerViewModel : ViewModel() {
     // LostHigherLowerGame just reads the value
     private val _streak = MutableStateFlow(value = 0)
     val streak = _streak.asStateFlow()
+
+    override fun enterGame() {
+        // Use .let so that the block only runs when mainPage is not null
+        mainPage?.let {
+            onPageChanged(newPage = it)
+        }
+    }
+
+    fun initGame(returnOverviewPage: () -> Unit) {
+        _game.value = Game(
+            name = "HIGHER OR LOWER",
+            page = GamesPage(
+                code = PageCode.HIGHERLOWER,
+                content = {
+                    MainHigherLowerGame(
+                        returnOverviewPage = returnOverviewPage
+                    ).SectionLayout()
+                }
+            ),
+            onEnter = {
+                mainPage?.let {
+                    onPageChanged(newPage = it)
+                }
+            }
+        )
+    }
 
     fun onPageChanged(newPage: HigherLowerPage) {
         _currentPage.value = newPage

@@ -28,7 +28,8 @@ data class GamesPage(
 // A data class that defines a game
 data class Game(
     val name: String,
-    val page: GamesPage
+    val page: GamesPage,
+    val onEnter: () -> Unit = {}
 )
 
 // An enum class that stores a code for each page, used to reliably identify a page

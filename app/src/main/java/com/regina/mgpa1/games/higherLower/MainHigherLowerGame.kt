@@ -2,6 +2,17 @@ package com.regina.mgpa1.games.higherLower
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
@@ -10,6 +21,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -51,6 +63,7 @@ import com.regina.mgpa1.sections.AppSection
 import com.regina.mgpa1.logic.GetLevelThumbnail
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.R
+import com.regina.mgpa1.logic.AnimatedNumber
 import com.regina.mgpa1.logic.BrushTitle
 import com.regina.mgpa1.logic.OutlinedHeadline
 import com.regina.mgpa1.logic.RenderMessage
@@ -107,8 +120,11 @@ class MainHigherLowerGame (
             gameViewModel.onPageChanged(newPage = mainPage)
         }
 
-        currentPage?: return
-        currentPage.content()
+        Crossfade(
+            targetState = currentPage
+        ) { screen ->
+            screen?.content()
+        }
     }
 }
 
@@ -159,14 +175,22 @@ fun MainContent(
     var unknownLevel by rememberSaveable {
         mutableStateOf<Level?>(value = null)
     }
+    var nextUnknownLevel by rememberSaveable {
+        mutableStateOf<Level?>(value = null)
+    }
 
     // LaunchedEffect: This block of code runs when levelList changes
     // (i.e. Finishes loading)
     LaunchedEffect(key1 = levelList) {
-        if (levelList.size >= 2) {
-            if (knownLevel == null || unknownLevel == null) {
-                knownLevel = levelList.random()
-                unknownLevel = levelList.random()
+        if (levelList.size >= 3) {
+            if (knownLevel == null || unknownLevel == null || nextUnknownLevel == null) {
+                // Kotlin functions to randomise the list and get 3 DIFFERENT
+                // values from it
+                val randomLevels = levelList.shuffled().take(n = 3)
+
+                knownLevel = randomLevels[0]
+                unknownLevel = randomLevels[1]
+                nextUnknownLevel = randomLevels[2]
             }
         }
     }
@@ -224,20 +248,27 @@ fun MainContent(
                 .fillMaxWidth()
 
             //Stat tracker region
-            Box(
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .background(Color("#1f2154".toColorInt()))
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "Streak: $streak",
+                    text = "Streak:",
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier.padding(all = 10.dp)
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+
+                AnimatedNumber(
+                    number = streak,
+                    style = MaterialTheme.typography.headlineLarge
                 )
             }
 
             //Known Region
-            KnownRegion(boxModifier, currentKnownLevel, knownPos)
+            KnownRegion(boxModifier, knownLevel = currentKnownLevel, knownPos)
 
             //Unknown Region
             UnknownRegion(
@@ -249,7 +280,11 @@ fun MainContent(
             )
         }
 
-        if (shouldShowPanel) {
+        AnimatedVisibility(
+            visible = shouldShowPanel,
+            enter = slideInVertically() + expandVertically() + fadeIn(),
+            exit = slideOutVertically() + shrinkVertically() + fadeOut()
+        ) {
             ChoicePanel(
                 unknownLevel = currentUnknownLevel, knownLevel = currentKnownLevel,
                 onChoiceMade = { choice ->
@@ -265,7 +300,13 @@ fun MainContent(
                     if (isChoiceCorrect) {
                         // Go next round
                         knownLevel = unknownLevel
-                        unknownLevel = levelList.randomOrNull()
+                        unknownLevel = nextUnknownLevel
+
+                        // Get random from the list that
+                        // excludes knownLevel & unknownLevel
+                        nextUnknownLevel = levelList.filter{
+                            it.id != knownLevel?.id && it.id != unknownLevel?.id
+                        }.randomOrNull()
 
                         // Increase streak
                         gameViewModel.onStreakIncreased()
@@ -292,19 +333,29 @@ fun KnownRegion(modifier: Modifier, knownLevel: Level, knownPos: Int) {
         modifier = modifier
     ) {
         // Loading the background image - Shld place error images here
-        AsyncImage(
-            model = GetLevelThumbnail(LevelID = knownLevel.level_id),
-            contentDescription = "Thumbnail",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize(),
-            onLoading = {imageLoading = true},
-            onError =  {imageLoading = false},
-            onSuccess =  {imageLoading = false}
-        )
-        if(imageLoading){
-            preLoadedUI()
-            return //Dont load the text until the image has loaded as well
+        val imageRequest: String = GetLevelThumbnail(LevelID = knownLevel.level_id)
+
+        AnimatedContent(
+            targetState = imageRequest,
+            transitionSpec = {
+                (slideInVertically { height -> height * 2 } + fadeIn() togetherWith
+                        slideOutVertically { height -> -height } + fadeOut())
+                    .using(
+                        SizeTransform(clip = false)
+                    )
+            }
+        ) { targetRequest ->
+            AsyncImage(
+                model = targetRequest,
+                contentDescription = "Thumbnail",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+                onLoading = {imageLoading = true},
+                onError =  {imageLoading = false},
+                onSuccess =  {imageLoading = false}
+            )
         }
+
         GameLevelInfo(
             levelName = knownLevel.name,
             position = knownPos
@@ -320,6 +371,7 @@ fun UnknownRegion(
     onClick: () -> Unit
 ) {
     var imageLoading by remember { mutableStateOf(false) } //Check if we need to load preloaded or image
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -336,19 +388,25 @@ fun UnknownRegion(
             }
     ) {
         // Loading the background image
-        AsyncImage(
-            model = GetLevelThumbnail(LevelID = unknownLevel.level_id),
-            contentDescription = "Thumbnail",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize(),
-            onLoading = {imageLoading = true},
-            onError =  {imageLoading = false},
-            onSuccess =  {imageLoading = false}
-        )
-        if(imageLoading){
-            preLoadedUI()
-            return
+        val imageRequest: String = GetLevelThumbnail(LevelID = unknownLevel.level_id)
+
+        AnimatedContent(
+            targetState = imageRequest,
+            transitionSpec = {
+                fadeIn() togetherWith fadeOut()
+            }
+        ) { targetRequest ->
+            AsyncImage(
+                model = targetRequest,
+                contentDescription = "Thumbnail",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+                onLoading = {imageLoading = true},
+                onError =  {imageLoading = false},
+                onSuccess =  {imageLoading = false}
+            )
         }
+
         GameLevelInfo(
             levelName = unknownLevel.name,
             position = uiUnknownPos

@@ -1,9 +1,12 @@
 package com.regina.mgpa1.games.higherLower
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -40,27 +43,19 @@ class LostHigherLowerGame(
             return
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(size = 10.dp)
-                )
-        ) {
-            Text(
-                text = "Game Over",
-                style = MaterialTheme.typography.headlineLarge
-            )
-            Spacer(modifier = Modifier.height(10.dp))
+        BackHandler {
+            // Go back to the Games section
+            returnOverviewPage()
+        }
 
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .padding(horizontal = 100.dp)
                     .border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -68,59 +63,76 @@ class LostHigherLowerGame(
                     )
             ) {
                 Text(
-                    text = "FINAL STREAK",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(all = 10.dp)
+                    text = "Game Over",
+                    style = MaterialTheme.typography.headlineLarge
                 )
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
-                    text = "$streak",
-                    style = MaterialTheme.typography.displayLarge,
-                    modifier = Modifier.padding(all = 10.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Button(
-                    onClick = {
-                        viewModel.onPageChanged(newPage = mainPage)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSecondary,
-                        contentColor = MaterialTheme.colorScheme.inverseSurface
-                    ),
-                    modifier = Modifier.width(200.dp)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 100.dp)
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            shape = RoundedCornerShape(size = 10.dp)
+                        )
                 ) {
                     Text(
-                        text = "Play Again",
-                        style = MaterialTheme.typography.labelLarge
+                        text = "FINAL STREAK",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(all = 10.dp)
                     )
-                }
-                Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
-                Button(
-                    onClick = {
-                        returnOverviewPage()
-                        viewModel.onPageChanged(newPage = mainPage)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.inverseSurface,
-                        contentColor = MaterialTheme.colorScheme.background
-                    ),
-                    modifier = Modifier.width(200.dp)
-                ) {
                     Text(
-                        text = "Return to Menu",
-                        style = MaterialTheme.typography.labelLarge
+                        text = "$streak",
+                        style = MaterialTheme.typography.displayLarge,
+                        modifier = Modifier.padding(all = 10.dp)
                     )
                 }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            viewModel.onPageChanged(newPage = mainPage)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onSecondary,
+                            contentColor = MaterialTheme.colorScheme.inverseSurface
+                        ),
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        Text(
+                            text = "Play Again",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Button(
+                        onClick = {
+                            returnOverviewPage()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.inverseSurface,
+                            contentColor = MaterialTheme.colorScheme.background
+                        ),
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        Text(
+                            text = "Return to Menu",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
             }
-            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

@@ -1,5 +1,12 @@
 package com.regina.mgpa1.logic
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -10,11 +17,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 
 //==INTERFACES
 interface Searchable {
     fun doesMatchSearchQuery(query: String) : Boolean
+}
+
+interface Playable {
+    fun enterGame()
 }
 
 //==FUNCTIONS
@@ -89,6 +101,31 @@ fun OutlinedHeadline(
             style = MaterialTheme.typography.headlineLarge.copy(
                 color = fillColor
             )
+        )
+    }
+}
+
+// A Composable function to render an animated number, does a vertical rolling animation
+// depending on whether the number is increased or decreased.
+@Composable
+fun AnimatedNumber(number: Int, style: TextStyle) {
+    AnimatedContent(
+        targetState = number,
+        transitionSpec = {
+           if (targetState > initialState) {
+               slideInVertically { height -> height } + fadeIn() togetherWith
+                       slideOutVertically { height -> -height } + fadeOut()
+           } else {
+               slideInVertically { height -> -height } + fadeIn() togetherWith
+                       slideOutVertically { height -> height } + fadeOut()
+           }.using(
+               SizeTransform(clip = false)
+           )
+        }
+    ) { targetNumber ->
+        Text(
+            text = "$targetNumber",
+            style = style
         )
     }
 }

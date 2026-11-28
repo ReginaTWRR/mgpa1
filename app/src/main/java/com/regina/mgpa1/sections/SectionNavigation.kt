@@ -5,7 +5,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomAppBar
@@ -16,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.regina.mgpa1.R
@@ -70,7 +68,7 @@ class SectionNavigation {
         val destinations = NavDestination.entries
 
         val pagerState = rememberPagerState(
-            initialPage = NavDestination.HOME.ordinal,
+            initialPage = NavDestination.GAMES.ordinal,
             pageCount = { destinations.size }
         )
 
@@ -151,12 +149,7 @@ class SectionNavigation {
                     .fillMaxSize()
                     .padding(paddingValues = innerPadding)
             ) { section ->
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    navSections[section].section.SectionLayout()
-                }
+                navSections[section].section.SectionLayout()
             }
         }
     }
