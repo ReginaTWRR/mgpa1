@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 //==CLASSES
 
-// A class to store data related to the Game Section
-class GameSectionViewModel : ViewModel() {
+// A class to store data related to the Games Section
+class GamesSectionViewModel : ViewModel() {
     private val _currentPage = MutableStateFlow<GamesPage?>(value = null)
     val currentPage = _currentPage.asStateFlow()
 

@@ -74,7 +74,7 @@ class MainHigherLowerGame (
         val gameViewModel = viewModel<HigherLowerViewModel>()
         val currentPage = gameViewModel.currentPage.collectAsState().value
 
-        // Define the main and lost pages
+        // Define the main page
         gameViewModel.mainPage = HigherLowerPage(
             code = HigherLowerPageCode.MAINHIGHERLOWER,
             content = {
@@ -84,11 +84,12 @@ class MainHigherLowerGame (
             }
         )
 
+        // Define the lost page
         gameViewModel.lostPage = HigherLowerPage(
             code = HigherLowerPageCode.LOSTHIGHERLOWER,
             content = {
                 LostHigherLowerGame(
-                    gameViewModel.mainPage, returnOverviewPage
+                    returnOverviewPage
                 ).SectionLayout()
             }
         )
@@ -136,7 +137,9 @@ fun MainContent(
             ErrorHandler(errorLevel)
             Spacer(modifier = Modifier.height(10.dp))
             Button(
-                onClick = returnOverviewPage
+                onClick = {
+                    returnOverviewPage()
+                }
             ) {
                 Text("return to Games Page")
             }

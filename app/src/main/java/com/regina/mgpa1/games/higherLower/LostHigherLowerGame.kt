@@ -20,25 +20,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.regina.mgpa1.ErrorUIs.preLoadedUI
 import com.regina.mgpa1.sections.AppSection
-import com.regina.mgpa1.viewModels.HigherLowerPage
 import com.regina.mgpa1.viewModels.HigherLowerViewModel
 
 //==CLASSES
 
 // A class that implements the lost Higher Lower game
 class LostHigherLowerGame(
-    val mainPage: HigherLowerPage?,
     val returnOverviewPage: () -> Unit
 ) : AppSection(header = "Lost Higher/Lower") {
     @Composable
     override fun SectionLayout() {
-        if (mainPage == null) {
+        val viewModel = viewModel<HigherLowerViewModel>()
+        val mainPage = viewModel.mainPage
+        val streak = viewModel.streak.collectAsState().value
+
+        if (mainPage == null)
+        {
             preLoadedUI()
             return
         }
-
-        val viewModel = viewModel<HigherLowerViewModel>()
-        val streak = viewModel.streak.collectAsState().value
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -104,7 +104,10 @@ class LostHigherLowerGame(
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Button(
-                    onClick = returnOverviewPage,
+                    onClick = {
+                        returnOverviewPage()
+                        viewModel.onPageChanged(newPage = mainPage)
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.inverseSurface,
                         contentColor = MaterialTheme.colorScheme.background

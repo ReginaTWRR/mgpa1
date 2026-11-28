@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.regina.mgpa1.games.higherLower.MainHigherLowerGame
 import com.regina.mgpa1.viewModels.Game
-import com.regina.mgpa1.viewModels.GameSectionViewModel
+import com.regina.mgpa1.viewModels.GamesSectionViewModel
 import com.regina.mgpa1.viewModels.GamesPage
 import com.regina.mgpa1.viewModels.PageCode
 
@@ -35,7 +35,7 @@ import com.regina.mgpa1.viewModels.PageCode
 class GamesAppSection : AppSection(header = "Games") {
     @Composable
     override fun SectionLayout() {
-        val viewModel = viewModel<GameSectionViewModel>()
+        val viewModel = viewModel<GamesSectionViewModel>()
         val currentPage = viewModel.currentPage.collectAsState().value
 
         // Need to declare overviewPage first. Dependency in higher lower game

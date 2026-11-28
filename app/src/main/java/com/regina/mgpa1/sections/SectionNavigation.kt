@@ -70,7 +70,7 @@ class SectionNavigation {
         val destinations = NavDestination.entries
 
         val pagerState = rememberPagerState(
-            initialPage = NavDestination.GAMES.ordinal,
+            initialPage = NavDestination.HOME.ordinal,
             pageCount = { destinations.size }
         )
 
