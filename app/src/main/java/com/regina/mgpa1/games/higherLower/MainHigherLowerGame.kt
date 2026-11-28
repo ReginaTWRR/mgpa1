@@ -44,7 +44,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.regina.mgpa1.ErrorUIs.preLoadedUI
@@ -58,182 +57,227 @@ import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.logic.StandardTitle
 import com.regina.mgpa1.logic.ErrorHandler
 import com.regina.mgpa1.viewModels.DemonListViewModel
+import com.regina.mgpa1.viewModels.HigherLowerPage
+import com.regina.mgpa1.viewModels.HigherLowerPageCode
 import com.regina.mgpa1.viewModels.HigherLowerViewModel
+import com.regina.mgpa1.viewModels.UserChoice
 
 //==CLASSES
 
 // A class that implements the main Higher Lower game
 class MainHigherLowerGame (
-    val onGameExit: () -> Unit,
     val returnOverviewPage: () -> Unit
 ) : AppSection(header = "Main Higher/Lower") {
     @Composable
     override fun SectionLayout() {
-        BackHandler {
-            // Go back to the Games section
-            returnOverviewPage()
-        }
-
         // Access the game view model
         val gameViewModel = viewModel<HigherLowerViewModel>()
+        val currentPage = gameViewModel.currentPage.collectAsState().value
 
-        val streak = gameViewModel.streak.collectAsState().value
-
-        // Access the list view model and get the 2 random levels
-        val listViewModel = viewModel<DemonListViewModel>()
-        val levelList by listViewModel.levelList.collectAsState()
-
-        if(levelList.isEmpty()) return
-
-        val errorLevel = levelList[0]
-
-        if(errorLevel.id == "-1") {
-            //Center both button and Error UI.
-            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                ErrorHandler(errorLevel)
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(onClick = returnOverviewPage) { Text("return to Games Page") }
+        // Define the main and lost pages
+        gameViewModel.mainPage = HigherLowerPage(
+            code = HigherLowerPageCode.MAINHIGHERLOWER,
+            content = {
+                MainContent(
+                    gameViewModel, gameViewModel.lostPage, returnOverviewPage
+                )
             }
+        )
 
-            return
-        }
-
-        var knownLevel by rememberSaveable {
-            mutableStateOf<Level?>(value = null)
-        }
-        var unknownLevel by rememberSaveable {
-            mutableStateOf<Level?>(value = null)
-        }
-
-        // LaunchedEffect: This block of code runs when levelList changes
-        // (i.e. Finishes loading)
-        LaunchedEffect(key1 = levelList) {
-            if (levelList.size >= 2) {
-                if (knownLevel == null || unknownLevel == null) {
-                    knownLevel = levelList.random()
-                    unknownLevel = levelList.random()
-                }
+        gameViewModel.lostPage = HigherLowerPage(
+            code = HigherLowerPageCode.LOSTHIGHERLOWER,
+            content = {
+                LostHigherLowerGame(
+                    gameViewModel.mainPage, returnOverviewPage
+                ).SectionLayout()
             }
-        }
+        )
 
-        // Need val versions of the known and unknown levels to allow for smart-casting
-        val currentKnownLevel = knownLevel
-        val currentUnknownLevel = unknownLevel
+        // Initialise the currentPage to mainPage
+        val mainPage = gameViewModel.mainPage
 
-        if (currentKnownLevel == null || currentUnknownLevel == null) {
+        if (mainPage == null) {
             preLoadedUI()
             return
         }
 
-        val knownPos = currentKnownLevel.position
-        val unknownPos = currentUnknownLevel.position
-
-        if (knownPos == null || unknownPos == null) {
-            RenderMessage(
-                text = "Game failed to load",
-                modifier = Modifier.fillMaxWidth()
-            )
-            return
+        if (currentPage == null)
+        {
+            gameViewModel.onPageChanged(newPage = mainPage)
         }
 
-        var uiUnknownPos by remember {
-            mutableIntStateOf(value = -1)
-        }
-
-        var shouldShowPanel by remember {
-            mutableStateOf(value = false)
-        }
-
-        BackHandler {
-            // Go back to the Games section
-            returnOverviewPage()
-        }
-
-        // Used to overlay the ChoiceButtons over everything else
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            //Base box
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                //Modifier Values(I placed box mod here cus the weight var is only accesible in the column)
-                val boxModifier: Modifier = Modifier
-                    .weight(0.5f)
-                    .background(Color("#2E2E5A".toColorInt()))
-                    .border(
-                        width = 2.dp,
-                        color = Color("#252535".toColorInt())
-                    )
-                    .fillMaxWidth()
-
-                //Stat tracker region
-                Box(
-                    modifier = Modifier
-                        .background(Color("#1f2154".toColorInt()))
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Streak: $streak",
-                        style = MaterialTheme.typography.headlineLarge,
-                        modifier = Modifier.padding(all = 10.dp)
-                    )
-                }
-
-                //Known Region
-                KnownRegion(boxModifier, currentKnownLevel, knownPos)
-
-                //Unknown Region
-                UnknownRegion(
-                    boxModifier,
-                    currentUnknownLevel, uiUnknownPos,
-                    onClick = {
-                        shouldShowPanel = true
-                    }
-                )
-            }
-
-            if (shouldShowPanel) {
-                ChoicePanel(
-                    unknownLevel = currentUnknownLevel, knownLevel = currentKnownLevel,
-                    onChoiceMade = { choice ->
-                        shouldShowPanel = false
-
-                        if (choice == UserChoice.NONE) return@ChoicePanel
-
-                        val isChoiceCorrect = evaluateChoice(
-                            choice, unknownPos, knownPos
-                        )
-
-                        // Respond to the evaluation
-                        if (isChoiceCorrect) {
-                            // Go next round
-                            knownLevel = unknownLevel
-                            unknownLevel = levelList.randomOrNull()
-
-                            // Increase streak
-                            gameViewModel.onStreakIncreased()
-                        } else {
-                            // Reset streak
-                            gameViewModel.onStreakReset()
-
-                            // Go back to the game lost page
-                            onGameExit()
-                        }
-                    }
-                )
-            }
-        }
+        currentPage?: return
+        currentPage.content()
     }
 }
 
-// An enum class that defines the choices a user can make
-enum class UserChoice {
-    NONE, HIGHER, LOWER
-}
-
 //==FUNCTIONS
+
+// A Composable function that renders the main content of the higher lower game
+@Composable
+fun MainContent(
+    gameViewModel: HigherLowerViewModel,
+    lostPage: HigherLowerPage?,
+    returnOverviewPage: () -> Unit
+) {
+    val streak = gameViewModel.streak.collectAsState().value
+
+    // Access the list view model and get the 2 random levels
+    val listViewModel = viewModel<DemonListViewModel>()
+    val levelList by listViewModel.levelList.collectAsState()
+
+    if(levelList.isEmpty()) return
+
+    val errorLevel = levelList[0]
+
+    if(errorLevel.id == "-1") {
+        //Center both button and Error UI.
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            ErrorHandler(errorLevel)
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = returnOverviewPage
+            ) {
+                Text("return to Games Page")
+            }
+        }
+
+        return
+    }
+
+    if (lostPage == null) {
+        preLoadedUI()
+        return
+    }
+
+    var knownLevel by rememberSaveable {
+        mutableStateOf<Level?>(value = null)
+    }
+    var unknownLevel by rememberSaveable {
+        mutableStateOf<Level?>(value = null)
+    }
+
+    // LaunchedEffect: This block of code runs when levelList changes
+    // (i.e. Finishes loading)
+    LaunchedEffect(key1 = levelList) {
+        if (levelList.size >= 2) {
+            if (knownLevel == null || unknownLevel == null) {
+                knownLevel = levelList.random()
+                unknownLevel = levelList.random()
+            }
+        }
+    }
+
+    // Need val versions of the known and unknown levels to allow for smart-casting
+    val currentKnownLevel = knownLevel
+    val currentUnknownLevel = unknownLevel
+
+    if (currentKnownLevel == null || currentUnknownLevel == null) {
+        preLoadedUI()
+        return
+    }
+
+    val knownPos = currentKnownLevel.position
+    val unknownPos = currentUnknownLevel.position
+
+    if (knownPos == null || unknownPos == null) {
+        RenderMessage(
+            text = "Game failed to load",
+            modifier = Modifier.fillMaxWidth()
+        )
+        return
+    }
+
+    var uiUnknownPos by remember {
+        mutableIntStateOf(value = -1)
+    }
+
+    var shouldShowPanel by remember {
+        mutableStateOf(value = false)
+    }
+
+    BackHandler {
+        // Go back to the Games section
+        returnOverviewPage()
+    }
+
+    // Used to overlay the ChoiceButtons over everything else
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        //Base box
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            //Modifier Values(I placed box mod here cus the weight var is only accesible in the column)
+            val boxModifier: Modifier = Modifier
+                .weight(0.5f)
+                .background(Color("#2E2E5A".toColorInt()))
+                .border(
+                    width = 2.dp,
+                    color = Color("#252535".toColorInt())
+                )
+                .fillMaxWidth()
+
+            //Stat tracker region
+            Box(
+                modifier = Modifier
+                    .background(Color("#1f2154".toColorInt()))
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Streak: $streak",
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.padding(all = 10.dp)
+                )
+            }
+
+            //Known Region
+            KnownRegion(boxModifier, currentKnownLevel, knownPos)
+
+            //Unknown Region
+            UnknownRegion(
+                boxModifier,
+                currentUnknownLevel, uiUnknownPos,
+                onClick = {
+                    shouldShowPanel = true
+                }
+            )
+        }
+
+        if (shouldShowPanel) {
+            ChoicePanel(
+                unknownLevel = currentUnknownLevel, knownLevel = currentKnownLevel,
+                onChoiceMade = { choice ->
+                    shouldShowPanel = false
+
+                    if (choice == UserChoice.NONE) return@ChoicePanel
+
+                    val isChoiceCorrect = evaluateChoice(
+                        choice, unknownPos, knownPos
+                    )
+
+                    // Respond to the evaluation
+                    if (isChoiceCorrect) {
+                        // Go next round
+                        knownLevel = unknownLevel
+                        unknownLevel = levelList.randomOrNull()
+
+                        // Increase streak
+                        gameViewModel.onStreakIncreased()
+                    } else {
+                        // Reset streak
+                        gameViewModel.onStreakReset()
+
+                        // Go to the game lost page
+                        gameViewModel.onPageChanged(newPage = lostPage)
+                    }
+                }
+            )
+        }
+    }
+}
 
 // A Composable function that renders the known region
 @Composable

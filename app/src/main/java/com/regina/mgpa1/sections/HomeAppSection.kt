@@ -53,10 +53,9 @@ import com.regina.mgpa1.logic.GetLevelDetails
 import com.regina.mgpa1.logic.Level
 import com.regina.mgpa1.logic.LevelDetails
 import com.regina.mgpa1.logic.LevelName
-import com.regina.mgpa1.logic.RenderMessage
 import com.regina.mgpa1.viewModels.DemonListViewModel
 import com.regina.mgpa1.viewModels.DemonSearchViewModel
-import com.regina.mgpa1.viewModels.HomePageViewModel
+import com.regina.mgpa1.viewModels.HomeSectionViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -77,12 +76,12 @@ class HomeAppSection(
 
         //For lack of a better fix, this ensures that the search viewmodel and hompageview modek
         //Doesnt get inititalised until the list is properly found
-        val ChecklevelList by listViewModel.levelList.collectAsState()
-        if(ChecklevelList.isEmpty())
+        val checkLevelList by listViewModel.levelList.collectAsState()
+        if(checkLevelList.isEmpty())
             return
-        val ErrorLevel = ChecklevelList[0]
-        if(ErrorLevel.id.equals("-1")){
-            ErrorHandler(ErrorLevel)
+        val errorLevel = checkLevelList[0]
+        if(errorLevel.id == "-1"){
+            ErrorHandler(errorLevel)
             return
         }
 
@@ -91,8 +90,8 @@ class HomeAppSection(
                 listViewModel = listViewModel
             )
         )
-        val homeViewModel = viewModel<HomePageViewModel>(
-            factory = HomePageViewModel.factory(
+        val homeViewModel = viewModel<HomeSectionViewModel>(
+            factory = HomeSectionViewModel.factory(
                 listViewModel = listViewModel
             )
         )
@@ -115,7 +114,7 @@ class HomeAppSection(
         val context = LocalContext.current
         val currActivity = LocalActivity.current
 
-        BackHandler() {
+        BackHandler {
             if(backPressed){
                 currActivity?.finish()
             }
@@ -178,7 +177,7 @@ fun SearchBar(viewModel: DemonSearchViewModel, searchText: String) {
 
     // Can only be called in the context of a Composable
     val isKeyboardActive = WindowInsets.ime.getBottom(density = LocalDensity.current) > 0
-    var wasKeyboardActive by rememberSaveable() {
+    var wasKeyboardActive by rememberSaveable {
         mutableStateOf(value = false)
     }
 
@@ -252,7 +251,7 @@ fun SearchBarResults(levelList: List<Level>, modifier: Modifier) {
 
 //A Composable function that renders a random demon
 @Composable
-fun RandomDemon(homeViewModel: HomePageViewModel) {
+fun RandomDemon(homeViewModel: HomeSectionViewModel) {
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
 
@@ -262,7 +261,7 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
     // actually loads.
     val generatedDemon by homeViewModel.generatedDemon.collectAsState()
     val demon = generatedDemon
-    var LevelDetails: LevelDetails
+    var levelDetails: LevelDetails
     var imageLoading by remember { mutableStateOf(false) }
     if (demon == null) {
         preLoadedUI()
@@ -271,14 +270,14 @@ fun RandomDemon(homeViewModel: HomePageViewModel) {
 
     //Place this here to ensure demon != null
     runBlocking {
-        LevelDetails = GetLevelDetails(demon.level_id)
+        levelDetails = GetLevelDetails(demon.level_id)
     }
 
 
     //Response code check for levelDetails
-    if(LevelDetails.id == "-1"){
-        ErrorHandler(LevelDetails)
-        return;
+    if(levelDetails.id == "-1"){
+        ErrorHandler(levelDetails)
+        return
     }
 
     Column (

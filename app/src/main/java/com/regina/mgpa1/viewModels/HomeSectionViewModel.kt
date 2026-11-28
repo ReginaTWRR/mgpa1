@@ -10,21 +10,21 @@ import kotlinx.coroutines.launch
 
 //==CLASSES
 
-// A class that stores states related to the Home Page
-class HomePageViewModel(
+// A class that stores states related to the Home Section
+class HomeSectionViewModel(
     val listViewModel: DemonListViewModel
 ) : ViewModel() {
-    // Store the random demon generated so that it does not refresh when exiting home page
+    // Store the random demon generated so that it does not refresh when exiting home section
     private val _generatedDemon = MutableStateFlow<Level?>(value = null)
     val generatedDemon = _generatedDemon.asStateFlow()
 
     init {
         // Watch the level list and get the random level once it has loaded
-        GetRandomDemon()
+        getRandomDemon()
     }
 
     //Function to refresh the Generated Demon
-    fun GetRandomDemon(){
+    fun getRandomDemon(){
         // Watch the level list and get the random level once it has loaded
         viewModelScope.launch {
             listViewModel.levelList.collect { levelList ->
@@ -42,7 +42,7 @@ class HomePageViewModel(
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return HomePageViewModel(
+                    return HomeSectionViewModel(
                         listViewModel = listViewModel
                     ) as T
                 }
